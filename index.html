@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        LostLink | Campus Lost & Found
+    </title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+                         NAVBAR
+====================================================== -->
+
+<header class="navbar">
+
+    <a
+        href="#home"
+        class="brand"
+    >
+
+        <span class="brand-logo">
+            L
+        </span>
+
+        <span>
+            LostLink
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="#home">
+            Home
+        </a>
+
+        <a href="#browse">
+            Browse Items
+        </a>
+
+        <a href="#campus-map">
+            Campus Map
+        </a>
+
+    </nav>
+
+
+    <div class="nav-buttons">
+
+        <button
+            class="login-btn"
+            onclick="openModal('loginModal')"
+        >
+            Log in
+        </button>
+
+
+        <button
+            class="primary-btn small"
+            onclick="openModal('reportModal')"
+        >
+            Report an Item
+        </button>
+
+    </div>
+
+
+    <button
+        class="menu-btn"
+        onclick="toggleMenu()"
+    >
+        ☰
+    </button>
+
+</header>
+
+
+
+<!-- =====================================================
+                          HERO
+====================================================== -->
+
+<section
+    class="hero"
+    id="home"
+>
+
+    <div class="hero-content">
+
+        <div class="hero-tag">
+            🎓 Campus Lost & Found
+        </div>
+
+
+        <h1>
+
+            Lost something?
+
+            <br>
+
+            <span>
+                Let's find it.
+            </span>
+
+        </h1>
+
+
+        <p>
+
+            A simple way for students to report,
+            search and reconnect with lost belongings
+            across campus.
+
+        </p>
+
+
+        <div class="search-box">
+
+            <span class="search-icon">
+                ⌕
+            </span>
+
+
+            <input
+                id="heroSearch"
+                type="text"
+                placeholder="Search for lost or found items..."
+            >
+
+
+            <button onclick="searchItems()">
+                Search
+            </button>
+
+        </div>
+
+
+        <div class="hero-buttons">
+
+            <button
+                class="primary-btn"
+                onclick="openModal('lostModal')"
+            >
+                I Lost Something
+            </button>
+
+
+            <button
+                class="secondary-btn"
+                onclick="openModal('foundModal')"
+            >
+                I Found Something
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-illustration">
+
+        <div class="floating-card card-one">
+
+            <span class="floating-icon">
+                🎧
+            </span>
+
+            <div>
+
+                <strong>
+                    AirPods
+                </strong>
+
+                <small>
+                    Found • Library
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="illustration-circle">
+
+            <div class="location-pin">
+                📍
+            </div>
+
+            <div class="orbit orbit-one"></div>
+
+            <div class="orbit orbit-two"></div>
+
+        </div>
+
+
+        <div class="floating-card card-two">
+
+            <span class="floating-icon">
+                🎒
+            </span>
+
+            <div>
+
+                <strong>
+                    Backpack
+                </strong>
+
+                <small>
+                    Lost • Block A
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+                          STATS
+====================================================== -->
+
+<section class="stats">
+
+    <div class="stat">
+
+        <strong id="statListed">
+            6+
+        </strong>
+
+        <span>
+            Items Listed
+        </span>
+
+    </div>
+
+
+    <div class="stat">
+
+        <strong>
+            173
+        </strong>
+
+        <span>
+            Items Returned
+        </span>
+
+    </div>
+
+
+    <div class="stat">
+
+        <strong id="statActive">
+            3
+        </strong>
+
+        <span>
+            Active Found
+        </span>
+
+    </div>
+
+
+    <div class="stat">
+
+        <strong>
+            94%
+        </strong>
+
+        <span>
+            Success Rate
+        </span>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+                       BROWSE ITEMS
+====================================================== -->
+
+<section
+    class="items-section"
+    id="browse"
+>
+
+    <div class="section-heading">
+
+        <div>
+
+            <span class="eyebrow">
+                RECENTLY POSTED
+            </span>
+
+            <h2>
+                Find what you're looking for
+            </h2>
+
+            <p>
+                Browse recently reported lost and found
+                items on campus.
+            </p>
+
+        </div>
+
+
+        <button
+            class="outline-btn"
+            onclick="showAllItems()"
+        >
+            View all items →
+        </button>
+
+    </div>
+
+
+    <div class="filter-row">
+
+        <button
+            class="filter active"
+            onclick="filterItems('all', this)"
+        >
+            All
+        </button>
+
+
+        <button
+            class="filter"
+            onclick="filterItems('lost', this)"
+        >
+            Lost
+        </button>
+
+
+        <button
+            class="filter"
+            onclick="filterItems('found', this)"
+        >
+            Found
+        </button>
+
+
+        <select
+            id="categoryFilter"
+            onchange="applyFilters()"
+        >
+
+            <option value="all">
+                All categories
+            </option>
+
+            <option value="electronics">
+                Electronics
+            </option>
+
+            <option value="bags">
+                Bags
+            </option>
+
+            <option value="documents">
+                Documents
+            </option>
+
+            <option value="accessories">
+                Accessories
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div
+        class="items-grid"
+        id="itemsGrid"
+    >
+
+
+        <!-- LOST ITEM -->
+
+        <article
+            class="item-card"
+            data-type="lost"
+            data-category="electronics"
+            data-location="Central Park"
+        >
+
+            <div class="item-image purple">
+
+                <div class="image-placeholder">
+                    🎧
+                </div>
+
+                <span class="status lost">
+                    LOST
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        Wireless Earbuds
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 Central Park
+                </p>
+
+
+                <p class="date">
+                    Posted 2 hours ago
+                </p>
+
+
+                <button
+                    onclick="locateItem('Central Park')"
+                >
+                    Locate on map →
+                </button>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- FOUND ITEM -->
+
+        <article
+            class="item-card"
+            data-type="found"
+            data-category="bags"
+            data-location="Chanakya Block"
+        >
+
+            <div class="item-image blue">
+
+                <div class="image-placeholder">
+                    🎒
+                </div>
+
+                <span class="status found">
+                    FOUND
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        Black Backpack
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 Chanakya Block
+                </p>
+
+
+                <p class="date">
+                    Posted 4 hours ago
+                </p>
+
+
+                <div class="item-actions">
+
+                    <button
+                        onclick="locateItem('Chanakya Block')"
+                    >
+                        Locate on map →
+                    </button>
+
+
+                    <button
+                        class="claim-btn"
+                        onclick="openClaimModal('Black Backpack')"
+                    >
+                        Claim Item
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- LOST ID -->
+
+        <article
+            class="item-card"
+            data-type="lost"
+            data-category="documents"
+            data-location="CV Raman Square"
+        >
+
+            <div class="item-image yellow">
+
+                <div class="image-placeholder">
+                    🪪
+                </div>
+
+                <span class="status lost">
+                    LOST
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        College ID Card
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 CV Raman Square
+                </p>
+
+
+                <p class="date">
+                    Posted yesterday
+                </p>
+
+
+                <button
+                    onclick="locateItem('CV Raman Square')"
+                >
+                    Locate on map →
+                </button>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- FOUND WATCH -->
+
+        <article
+            class="item-card"
+            data-type="found"
+            data-category="accessories"
+            data-location="Central Park"
+        >
+
+            <div class="item-image pink">
+
+                <div class="image-placeholder">
+                    ⌚
+                </div>
+
+                <span class="status found">
+                    FOUND
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        Smart Watch
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 Central Park
+                </p>
+
+
+                <p class="date">
+                    Posted yesterday
+                </p>
+
+
+                <div class="item-actions">
+
+                    <button
+                        onclick="locateItem('Central Park')"
+                    >
+                        Locate on map →
+                    </button>
+
+
+                    <button
+                        class="claim-btn"
+                        onclick="openClaimModal('Smart Watch')"
+                    >
+                        Claim Item
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- LOST WALLET -->
+
+        <article
+            class="item-card"
+            data-type="lost"
+            data-category="bags"
+            data-location="Phoenix Circle"
+        >
+
+            <div class="item-image green">
+
+                <div class="image-placeholder">
+                    👝
+                </div>
+
+                <span class="status lost">
+                    LOST
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        Brown Wallet
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 Phoenix Circle
+                </p>
+
+
+                <p class="date">
+                    Posted 2 days ago
+                </p>
+
+
+                <button
+                    onclick="locateItem('Phoenix Circle')"
+                >
+                    Locate on map →
+                </button>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- FOUND PHONE -->
+
+        <article
+            class="item-card"
+            data-type="found"
+            data-category="electronics"
+            data-location="Sanskriti Auditorium"
+        >
+
+            <div class="item-image orange">
+
+                <div class="image-placeholder">
+                    📱
+                </div>
+
+                <span class="status found">
+                    FOUND
+                </span>
+
+            </div>
+
+
+            <div class="item-body">
+
+                <div class="item-title">
+
+                    <h3>
+                        Mobile Phone
+                    </h3>
+
+                    <span>
+                        ⋮
+                    </span>
+
+                </div>
+
+
+                <p class="location">
+                    📍 Sanskriti Auditorium
+                </p>
+
+
+                <p class="date">
+                    Posted 2 days ago
+                </p>
+
+
+                <div class="item-actions">
+
+                    <button
+                        onclick="locateItem('Sanskriti Auditorium')"
+                    >
+                        Locate on map →
+                    </button>
+
+
+                    <button
+                        class="claim-btn"
+                        onclick="openClaimModal('Mobile Phone')"
+                    >
+                        Claim Item
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+    <p
+        class="empty-state"
+        id="emptyState"
+    >
+        No matching items found.
+    </p>
+
+</section>
+
+
+
+<!-- =====================================================
+                       CAMPUS MAP
+====================================================== -->
+
+<section
+    class="map-section"
+    id="campus-map"
+>
+
+    <div class="map-header">
+
+        <div>
+
+            <span class="eyebrow">
+                CAMPUS LOCATION
+            </span>
+
+            <h2>
+                Locate the lost or found item
+            </h2>
+
+            <p>
+                Click directly on the campus map or
+                select a location to find items reported
+                there and nearby.
+            </p>
+
+        </div>
+
+
+        <button
+            class="clear-map-btn"
+            onclick="clearMarker()"
+        >
+            Clear Location
+        </button>
+
+    </div>
+
+
+    <div class="map-controls">
+
+        <div class="location-selector">
+
+            <span>
+                📍
+            </span>
+
+
+            <select
+                id="mapLocation"
+                onchange="locateFromSelect()"
+            >
+
+                <option value="">
+                    Select a campus location
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="primary-btn locate-button"
+            onclick="locateSelectedLocation()"
+        >
+            📍 Locate
+        </button>
+
+    </div>
+
+
+
+    <div
+        class="map-container"
+        id="mapContainer"
+    >
+
+        <img
+            src="campus-map.jpg"
+            alt="KPRIET Campus Map"
+            class="campus-map"
+            id="campusMapImage"
+        >
+
+
+        <div
+            class="map-instruction"
+            id="mapInstruction"
+        >
+            👆 Click on the map to locate a nearby campus area
+        </div>
+
+
+        <div
+            id="mapMarker"
+            class="map-marker"
+        >
+
+            <div class="marker-pin">
+                📍
+            </div>
+
+
+            <div class="marker-label">
+
+                <strong id="markerTitle">
+                    Location
+                </strong>
+
+                <span>
+                    LostLink location
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div
+        id="selectedLocation"
+        class="selected-location"
+    >
+
+        <span>
+            📍
+        </span>
+
+        <div>
+
+            <strong>
+                No location selected
+            </strong>
+
+            <small>
+                Click the map or select a campus location.
+            </small>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- LOCATION RESULTS -->
+
+    <div
+        class="nearby-results"
+        id="nearbyResults"
+    >
+
+        <div class="results-heading">
+
+            <span class="eyebrow">
+                LOCATION RESULTS
+            </span>
+
+            <h3 id="resultsTitle">
+                Select a place on the map
+            </h3>
+
+            <p id="resultsDescription">
+                Click anywhere on the campus map to find
+                lost and found items nearby.
+            </p>
+
+        </div>
+
+
+        <div class="location-group">
+
+            <h4>
+                📍 Items at this location
+            </h4>
+
+
+            <div
+                class="location-items"
+                id="exactLocationItems"
+            >
+
+                <div class="no-items">
+                    No location selected yet.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="location-group">
+
+            <h4>
+                🧭 Nearby items
+            </h4>
+
+
+            <div
+                class="location-items"
+                id="nearbyLocationItems"
+            >
+
+                <div class="no-items">
+                    Select a location to see nearby items.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+                         FOOTER
+====================================================== -->
+
+<footer>
+
+    <div class="footer-brand">
+
+        <span class="brand-logo">
+            L
+        </span>
+
+        <strong>
+            LostLink
+        </strong>
+
+    </div>
+
+
+    <p>
+        Making campus a little less forgetful.
+    </p>
+
+
+    <span>
+        © 2026 LostLink
+    </span>
+
+</footer>
+
+
+
+<!-- =====================================================
+                  REPORT CHOICE MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="reportModal"
+>
+
+    <div class="modal">
+
+        <button
+            class="close"
+            onclick="closeModal('reportModal')"
+        >
+            ×
+        </button>
+
+
+        <span class="eyebrow">
+            REPORT
+        </span>
+
+
+        <h2>
+            What happened?
+        </h2>
+
+
+        <p>
+            Choose the type of report you want to create.
+        </p>
+
+
+        <div class="choice-grid">
+
+            <button
+                class="choice"
+                onclick="
+                closeModal('reportModal');
+                openModal('lostModal');
+                "
+            >
+
+                🔍
+
+                <strong>
+                    I Lost Something
+                </strong>
+
+                <small>
+                    Report an item you can't find.
+                </small>
+
+            </button>
+
+
+            <button
+                class="choice"
+                onclick="
+                closeModal('reportModal');
+                openModal('foundModal');
+                "
+            >
+
+                🤝
+
+                <strong>
+                    I Found Something
+                </strong>
+
+                <small>
+                    Help someone get their item back.
+                </small>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+                       LOST MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="lostModal"
+>
+
+    <div class="modal">
+
+        <button
+            class="close"
+            onclick="closeModal('lostModal')"
+        >
+            ×
+        </button>
+
+
+        <span class="eyebrow">
+            LOST ITEM
+        </span>
+
+
+        <h2>
+            Report a lost item
+        </h2>
+
+
+        <form
+            id="lostForm"
+            onsubmit="submitReport(event, 'lost')"
+        >
+
+
+            <label class="form-label">
+                Item Photo
+            </label>
+
+
+            <div class="image-upload">
+
+                <input
+                    type="file"
+                    id="lostItemImage"
+                    accept="image/*"
+                    onchange="previewImage(this, 'lostPreview')"
+                >
+
+
+                <label
+                    for="lostItemImage"
+                    class="upload-box"
+                >
+
+                    <span>
+                        📷
+                    </span>
+
+                    <strong>
+                        Upload item photo
+                    </strong>
+
+                    <small>
+                        JPG, PNG or WEBP • Max 5 MB
+                    </small>
+
+                </label>
+
+            </div>
+
+
+            <img
+                id="lostPreview"
+                class="image-preview"
+                alt="Lost item preview"
+            >
+
+
+            <input
+                id="lostItemName"
+                required
+                placeholder="Item name"
+            >
+
+
+            <select
+                id="lostLocation"
+                required
+            >
+
+                <option value="">
+                    Where did you lose it?
+                </option>
+
+            </select>
+
+
+            <select
+                id="lostCategory"
+                required
+            >
+
+                <option value="">
+                    Category
+                </option>
+
+                <option value="electronics">
+                    Electronics
+                </option>
+
+                <option value="bags">
+                    Bags
+                </option>
+
+                <option value="documents">
+                    Documents
+                </option>
+
+                <option value="accessories">
+                    Accessories
+                </option>
+
+            </select>
+
+
+            <textarea
+                id="lostDescription"
+                placeholder="Describe the item..."
+            ></textarea>
+
+
+            <button
+                class="primary-btn full"
+                type="submit"
+            >
+                Submit Lost Report
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+                       FOUND MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="foundModal"
+>
+
+    <div class="modal">
+
+        <button
+            class="close"
+            onclick="closeModal('foundModal')"
+        >
+            ×
+        </button>
+
+
+        <span class="eyebrow">
+            FOUND ITEM
+        </span>
+
+
+        <h2>
+            Report a found item
+        </h2>
+
+
+        <form
+            id="foundForm"
+            onsubmit="submitReport(event, 'found')"
+        >
+
+
+            <label class="form-label">
+                Item Photo
+            </label>
+
+
+            <div class="image-upload">
+
+                <input
+                    type="file"
+                    id="foundItemImage"
+                    accept="image/*"
+                    onchange="previewImage(this, 'foundPreview')"
+                >
+
+
+                <label
+                    for="foundItemImage"
+                    class="upload-box"
+                >
+
+                    <span>
+                        📷
+                    </span>
+
+                    <strong>
+                        Upload item photo
+                    </strong>
+
+                    <small>
+                        JPG, PNG or WEBP • Max 5 MB
+                    </small>
+
+                </label>
+
+            </div>
+
+
+            <img
+                id="foundPreview"
+                class="image-preview"
+                alt="Found item preview"
+            >
+
+
+            <input
+                id="foundItemName"
+                required
+                placeholder="What did you find?"
+            >
+
+
+            <select
+                id="foundLocation"
+                required
+            >
+
+                <option value="">
+                    Where did you find it?
+                </option>
+
+            </select>
+
+
+            <select
+                id="foundCategory"
+                required
+            >
+
+                <option value="">
+                    Category
+                </option>
+
+                <option value="electronics">
+                    Electronics
+                </option>
+
+                <option value="bags">
+                    Bags
+                </option>
+
+                <option value="documents">
+                    Documents
+                </option>
+
+                <option value="accessories">
+                    Accessories
+                </option>
+
+            </select>
+
+
+            <textarea
+                id="foundDescription"
+                placeholder="General description of the item..."
+            ></textarea>
+
+
+
+            <!-- PRIVATE VERIFICATION -->
+
+            <div class="verification-box">
+
+                <div class="verification-title">
+
+                    <span>
+                        🔐
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Private verification
+                        </strong>
+
+                        <small>
+                            This information will NOT be shown publicly.
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <label class="form-label">
+                    Special characteristic
+                </label>
+
+
+                <input
+                    type="text"
+                    id="verificationCharacteristic"
+                    required
+                    placeholder="Example: Small scratch near the camera"
+                >
+
+
+                <p class="verification-help">
+
+                    Choose a detail that is difficult for a stranger
+                    to guess from the photo. The claimant must
+                    describe this detail before the claim can proceed.
+
+                </p>
+
+            </div>
+
+
+            <button
+                class="primary-btn full"
+                type="submit"
+            >
+                Submit Found Report
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+                    CLAIM VERIFICATION MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="claimModal"
+>
+
+    <div class="modal">
+
+        <button
+            class="close"
+            onclick="closeModal('claimModal')"
+        >
+            ×
+        </button>
+
+
+        <span class="eyebrow">
+            ITEM VERIFICATION
+        </span>
+
+
+        <h2>
+            Claim this item
+        </h2>
+
+
+        <p>
+
+            Describe a special characteristic
+            that only the genuine owner would know.
+
+        </p>
+
+
+        <div class="claim-item-name">
+
+            <span>
+                📦
+            </span>
+
+            <strong id="claimItemName">
+                Item
+            </strong>
+
+        </div>
+
+
+        <form
+            onsubmit="verifyClaim(event)"
+        >
+
+            <label class="form-label">
+
+                What special characteristic does
+                this item have?
+
+            </label>
+
+
+            <textarea
+                id="claimAnswer"
+                required
+                placeholder="Describe a unique detail only the owner would know..."
+            ></textarea>
+
+
+            <p class="claim-warning">
+
+                🔐 Your answer is compared with the
+                private characteristic provided by the finder.
+
+            </p>
+
+
+            <button
+                class="primary-btn full"
+                type="submit"
+            >
+                Verify Ownership
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+                         LOGIN MODAL
+====================================================== -->
+
+<div
+    class="modal-overlay"
+    id="loginModal"
+>
+
+    <div class="modal">
+
+        <button
+            class="close"
+            onclick="closeModal('loginModal')"
+        >
+            ×
+        </button>
+
+
+        <span class="eyebrow">
+            WELCOME BACK
+        </span>
+
+
+        <h2>
+            Log in to LostLink
+        </h2>
+
+
+        <form
+            onsubmit="loginDemo(event)"
+        >
+
+            <input
+                type="email"
+                required
+                placeholder="College email"
+            >
+
+
+            <input
+                type="password"
+                required
+                placeholder="Password"
+            >
+
+
+            <button
+                class="primary-btn full"
+                type="submit"
+            >
+                Log in
+            </button>
+
+        </form>
+
+
+        <p class="demo-note">
+
+            Frontend demo — authentication will be
+            connected later.
+
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
