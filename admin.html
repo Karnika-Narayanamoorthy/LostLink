@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LostLink Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+/* ── Reset ─────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#6256e8;--primary-dark:#5045d2;--primary-light:#eceaff;
+  --text:#17172b;--muted:#707086;--border:#e8e7f1;--soft:#f7f6ff;
+  --success:#189866;--danger:#e14f65;--warning:#f59e0b;
+  --radius:14px;--shadow:0 12px 35px rgba(31,27,74,.08);
+  --sidebar:240px;
+}
+html,body{height:100%;font-family:"Inter",sans-serif;color:var(--text);background:#f4f3fa}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+a{text-decoration:none;color:inherit}
+img{display:block}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+
+/* ── Layout ────────────────────────────── */
+.admin-layout{display:flex;min-height:100vh}
+
+/* ── Sidebar ───────────────────────────── */
+.sidebar{
+  width:var(--sidebar);min-height:100vh;
+  background:linear-gradient(180deg,#1a1840 0%,#2d2860 100%);
+  color:#fff;display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;z-index:50;
+  transition:.25s
+}
+.sidebar-brand{
+  padding:22px 20px 18px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  font-size:18px;font-weight:800
+}
+.sidebar-brand-icon{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--primary);color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:15px
+}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-section-label{
+  font-size:9px;letter-spacing:1.5px;font-weight:800;
+  color:rgba(255,255,255,.35);padding:16px 20px 6px;text-transform:uppercase
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 20px;font-size:13px;font-weight:500;
+  color:rgba(255,255,255,.7);cursor:pointer;
+  border-left:3px solid transparent;transition:.15s
+}
+.sidebar-link:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar-link.active{
+  background:rgba(255,255,255,.12);color:#fff;
+  border-left-color:var(--primary)
+}
+.sidebar-link .icon{font-size:16px;width:20px;text-align:center}
+.sidebar-badge{
+  margin-left:auto;background:var(--danger);color:#fff;
+  font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center
+}
+.sidebar-footer{
+  padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);
+  font-size:12px;color:rgba(255,255,255,.5)
+}
+.sidebar-user{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sidebar-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:13px;font-weight:800;display:grid;place-items:center
+}
+.sidebar-user-info strong{display:block;font-size:12px;color:#fff}
+.sidebar-user-info small{font-size:10px;color:rgba(255,255,255,.5)}
+.logout-btn{
+  width:100%;padding:9px;background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.7);border-radius:9px;font-size:12px;
+  transition:.15s;text-align:center
+}
+.logout-btn:hover{background:rgba(225,79,101,.25);color:#e14f65}
+
+/* ── Main content ──────────────────────── */
+.main-content{
+  margin-left:var(--sidebar);flex:1;
+  display:flex;flex-direction:column;min-height:100vh
+}
+.topbar{
+  height:60px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;position:sticky;top:0;z-index:40
+}
+.topbar-title{font-size:17px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.refresh-btn{
+  background:var(--soft);border:1px solid var(--border);
+  border-radius:9px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--muted);
+  transition:.15s
+}
+.refresh-btn:hover{border-color:var(--primary);color:var(--primary)}
+.page-content{padding:28px;flex:1}
+
+/* ── Sections (pages) ──────────────────── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── Stat cards ─────────────────────────── */
+.stat-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:14px;margin-bottom:28px
+}
+.stat-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;transition:.15s
+}
+.stat-card:hover{box-shadow:var(--shadow)}
+.stat-card-num{font-size:28px;font-weight:800;line-height:1}
+.stat-card-label{font-size:11px;color:var(--muted);margin-top:6px}
+.stat-card.c-primary .stat-card-num{color:var(--primary)}
+.stat-card.c-success .stat-card-num{color:var(--success)}
+.stat-card.c-danger  .stat-card-num{color:var(--danger)}
+.stat-card.c-warning .stat-card-num{color:var(--warning)}
+
+/* ── Dashboard grid ─────────────────────── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.dash-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.dash-card h3{font-size:14px;font-weight:800;margin-bottom:14px}
+.dash-card.full{grid-column:1/-1}
+
+/* ── Charts placeholder ─────────────────── */
+.chart-wrap{position:relative;height:200px;display:flex;align-items:flex-end;gap:4px;padding:0 4px}
+.chart-bar{
+  flex:1;background:var(--primary-light);border-radius:4px 4px 0 0;
+  transition:.4s ease;min-height:4px;position:relative
+}
+.chart-bar.found-bar{background:#c7f0dd}
+.chart-bar.lost-bar{background:var(--primary-light)}
+.chart-label{
+  position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:var(--muted);white-space:nowrap
+}
+.chart-legend{display:flex;gap:16px;margin-top:28px;font-size:11px}
+.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+
+/* Donut chart */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-svg{flex-shrink:0}
+.donut-legend{flex:1}
+.donut-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.donut-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+/* ── Tables ─────────────────────────────── */
+.table-toolbar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  margin-bottom:14px
+}
+.search-input{
+  flex:1;min-width:180px;border:1px solid var(--border);border-radius:9px;
+  padding:9px 13px;font-size:13px;outline:none
+}
+.search-input:focus{border-color:var(--primary)}
+.filter-select{
+  border:1px solid var(--border);background:#fff;border-radius:9px;
+  padding:9px 13px;font-size:12px;color:var(--text);outline:none
+}
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{
+  padding:11px 14px;text-align:left;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+  background:var(--soft);border-bottom:1px solid var(--border)
+}
+.data-table td{
+  padding:12px 14px;font-size:12px;
+  border-bottom:1px solid #f3f2f9;vertical-align:middle
+}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover{background:#faf9ff}
+.data-table td strong{display:block;font-size:13px}
+.data-table td small{color:var(--muted)}
+
+/* ── Pagination ─────────────────────────── */
+.pagination{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-top:1px solid var(--border);
+  background:#fff;font-size:12px;color:var(--muted)
+}
+.pagination-btns{display:flex;gap:6px}
+.page-btn{
+  border:1px solid var(--border);border-radius:7px;
+  padding:6px 12px;font-size:12px;background:#fff;
+  transition:.15s;cursor:pointer
+}
+.page-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.page-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Status pills ───────────────────────── */
+.pill{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:10px;font-weight:800;text-transform:uppercase
+}
+.pill-pending  {background:#fff6d8;color:#b45309}
+.pill-approved {background:#e8f8f0;color:var(--success)}
+.pill-rejected {background:#ffecef;color:var(--danger)}
+.pill-returned {background:#e8f2ff;color:#1d6fb3}
+.pill-cancelled{background:#f3f3f6;color:#888}
+.pill-lost     {background:#ffecef;color:var(--danger)}
+.pill-found    {background:#e8f8f0;color:var(--success)}
+.pill-active   {background:#e8f8f0;color:var(--success)}
+.pill-suspended{background:#ffecef;color:var(--danger)}
+.pill-issued   {background:#e8f8f0;color:var(--success)}
+.pill-confirmed{background:#fff6d8;color:#b45309}
+.pill-pending-review{background:#e8f2ff;color:#1d6fb3}
+
+/* ── Action buttons ─────────────────────── */
+.act-btn{
+  font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;
+  border:1px solid transparent;cursor:pointer;transition:.15s
+}
+.act-btn.approve{background:#e8f8f0;color:var(--success);border-color:#c2eedb}
+.act-btn.reject {background:#ffecef;color:var(--danger);border-color:#ffd4da}
+.act-btn.view   {background:#e8f2ff;color:#1d6fb3;border-color:#c2d9f5}
+.act-btn.issue  {background:var(--primary-light);color:var(--primary);border-color:#cac4f5}
+.act-btn.warn   {background:#fff6d8;color:#b45309;border-color:#f0d993}
+.act-btn-row{display:flex;gap:5px;flex-wrap:wrap}
+
+/* ── Section heading ────────────────────── */
+.section-header{
+  display:flex;align-items:center;justify-content: space-between;
+  gap:14px;margin-bottom:20px;flex-wrap:wrap
+}
+.section-header h2{font-size:22px;font-weight:800}
+.section-header p{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── Info cards ─────────────────────────── */
+.info-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;margin-bottom:16px
+}
+.info-card h4{font-size:14px;font-weight:700;margin-bottom:12px}
+.info-row{display:flex;gap:8px;margin-bottom:8px;font-size:12px}
+.info-label{color:var(--muted);min-width:130px;flex-shrink:0}
+.info-value{font-weight:600}
+
+/* ── Score bar ──────────────────────────── */
+.score-bar-outer{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:4px 0;max-width:160px}
+.score-bar-inner{height:100%;border-radius:4px}
+.score-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.score-chip{
+  font-size:10px;padding:2px 7px;border-radius:20px;
+  background:var(--soft);border:1px solid var(--border);color:var(--muted)
+}
+.score-chip strong{color:var(--text)}
+
+/* ── Claim answer ───────────────────────── */
+.answer-reveal{
+  background:#f8f7ff;border:1px solid #e2deff;border-radius:9px;
+  padding:10px 12px;font-size:12px
+}
+.answer-label{font-size:10px;font-weight:800;color:var(--primary);display:block;margin-bottom:4px}
+
+/* ── Student profile panel ──────────────── */
+.student-panel{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden
+}
+.student-panel-header{
+  background:linear-gradient(135deg,var(--primary),#8878f0);
+  padding:22px;color:#fff
+}
+.student-panel-header h3{font-size:18px;font-weight:800}
+.student-panel-body{padding:20px}
+
+/* ── Audit log ──────────────────────────── */
+.audit-item{
+  display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f3f2f9;
+  align-items:flex-start
+}
+.audit-icon{
+  width:34px;height:34px;border-radius:10px;background:var(--soft);
+  display:grid;place-items:center;font-size:15px;flex-shrink:0
+}
+.audit-body{flex:1;min-width:0}
+.audit-body strong{font-size:12px;display:block}
+.audit-body small{font-size:11px;color:var(--muted)}
+.audit-time{font-size:10px;color:#aaa8b6;white-space:nowrap;flex-shrink:0}
+
+/* ── Empty / loading ────────────────────── */
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:44px;display:block;margin-bottom:12px}
+.empty-state p{font-size:14px}
+.spinner{
+  width:28px;height:28px;border:3px solid var(--border);
+  border-top-color:var(--primary);border-radius:50%;
+  animation:spin .7s linear infinite;margin:0 auto
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-box{padding:40px;text-align:center}
+
+/* ── Toast ──────────────────────────────── */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#17172b;color:#fff;
+  padding:11px 20px;border-radius:30px;
+  font-size:13px;font-weight:600;z-index:9999;
+  opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;max-width:90vw;
+  box-shadow:0 8px 30px rgba(0,0,0,.25)
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--success)}
+.toast.error  {background:var(--danger)}
+.toast.info   {background:var(--primary)}
+
+/* ── Modal ──────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(17,17,35,.55);backdrop-filter:blur(5px);
+  z-index:1000;align-items:center;justify-content:center;padding:20px
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  width:min(500px,100%);max-height:90vh;overflow-y:auto;
+  background:#fff;border-radius:20px;padding:28px;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.2)
+}
+.modal-close{
+  position:absolute;right:14px;top:12px;
+  background:#f3f2f7;width:30px;height:30px;border-radius:50%;
+  font-size:20px;color:#666;display:grid;place-items:center
+}
+.modal-close:hover{background:#eae9f0}
+.modal-box h2{font-size:22px;margin-bottom:16px}
+.form-label{display:block;font-size:11px;font-weight:700;color:#45445a;margin-bottom:4px}
+.form-input{
+  width:100%;border:1px solid #dddce7;border-radius:9px;
+  padding:11px 13px;outline:none;font-size:13px;margin-bottom:12px
+}
+.form-input:focus{border-color:var(--primary)}
+textarea.form-input{min-height:80px;resize:vertical}
+.form-msg{font-size:12px;margin-top:4px;min-height:16px}
+.form-msg.err{color:var(--danger)}
+.form-msg.ok {color:var(--success)}
+.btn-primary{
+  width:100%;padding:12px;background:var(--primary);color:#fff;
+  border-radius:10px;font-weight:700;font-size:13px;
+  transition:.15s;margin-top:6px
+}
+.btn-primary:hover{background:var(--primary-dark)}
+
+/* ── Responsive ─────────────────────────── */
+@media(max-width:900px){
+  .sidebar{width:200px}
+  .main-content{margin-left:200px}
+  .dash-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .page-content{padding:16px}
+}
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">L</div>
+    <span>LostLink Admin</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <div class="sidebar-link active" data-page="dashboard" onclick="navTo('dashboard',this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+
+    <div class="nav-section-label">Management</div>
+    <div class="sidebar-link" data-page="students" onclick="navTo('students',this)">
+      <span class="icon">👥</span> Students
+    </div>
+    <div class="sidebar-link" data-page="items" onclick="navTo('items',this)">
+      <span class="icon">📦</span> Item Reports
+      <span class="sidebar-badge" id="sbBadgePending">0</span>
+    </div>
+    <div class="sidebar-link" data-page="claims" onclick="navTo('claims',this)">
+      <span class="icon">📋</span> Claims
+      <span class="sidebar-badge" id="sbBadgeClaims">0</span>
+    </div>
+    <div class="sidebar-link" data-page="matches" onclick="navTo('matches',this)">
+      <span class="icon">🎯</span> Smart Matches
+    </div>
+
+    <div class="nav-section-label">Rewards</div>
+    <div class="sidebar-link" data-page="contributions" onclick="navTo('contributions',this)">
+      <span class="icon">⭐</span> Contributions
+    </div>
+    <div class="sidebar-link" data-page="rewards" onclick="navTo('rewards',this)">
+      <span class="icon">🏆</span> Monthly Rewards
+      <span class="sidebar-badge" id="sbBadgeRewards" style="display:none">!</span>
+    </div>
+
+    <div class="nav-section-label">Insights</div>
+    <div class="sidebar-link" data-page="analytics" onclick="navTo('analytics',this)">
+      <span class="icon">📈</span> Analytics
+    </div>
+    <div class="sidebar-link" data-page="auditlog" onclick="navTo('auditlog',this)">
+      <span class="icon">🔒</span> Audit Log
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+      <div class="sidebar-user-info">
+        <strong id="sidebarName">Admin</strong>
+        <small id="sidebarEmail">—</small>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="adminLogout()">🚪 Log out</button>
+    <div style="margin-top:10px;text-align:center">
+      <a href="/" style="font-size:11px;color:rgba(255,255,255,.4)">← Back to LostLink site</a>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<div class="main-content">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="sidebarToggle" onclick="document.getElementById('sidebar').classList.toggle('open')"
+        style="display:none;background:none;font-size:22px;padding:4px">☰</button>
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="refreshCurrentSection()">↻ Refresh</button>
+      <span id="topbarClock" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ═══ LOGIN SCREEN ═══ -->
+    <div class="section active" id="sec-login" style="max-width:420px;margin:60px auto">
+      <div style="text-align:center;margin-bottom:30px">
+        <div style="width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;font-size:26px;font-weight:800;display:grid;place-items:center;margin:0 auto 14px">L</div>
+        <h1 style="font-size:24px;font-weight:800">LostLink Admin</h1>
+        <p style="color:var(--muted);font-size:13px;margin-top:4px">Secure administrator access</p>
+      </div>
+      <div class="info-card">
+        <form onsubmit="doAdminLogin(event)">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="loginEmail" required placeholder="admin@kpriet.ac.in" autocomplete="email">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="loginPassword" required placeholder="Password">
+          <button type="submit" class="btn-primary" id="loginBtn">Log in to Admin Panel</button>
+          <p class="form-msg err" id="loginErr" style="text-align:center;margin-top:8px"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="section" id="sec-dashboard">
+      <div class="section-header">
+        <div><h2>Dashboard</h2><p>Real-time campus lost &amp; found overview</p></div>
+      </div>
+      <div class="stat-grid" id="statGrid">
+        <div class="loading-box" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+      <div class="dash-grid" id="dashGrid">
+        <div class="loading-box" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ STUDENTS ═══ -->
+    <div class="section" id="sec-students">
+      <div class="section-header">
+        <div><h2>Student Management</h2><p>View, search and manage student accounts</p></div>
+      </div>
+      <div class="table-toolbar">
+        <input class="search-input" id="stuSearch" placeholder="Search name, email, section…" oninput="debounce(()=>loadStudents(),400)">
+        <select class="filter-select" id="stuStatus" onchange="loadStudents()">
+          <option value="all">All students</option>
+          <option value="active">Active</option>
+          <option value="suspended">Suspended</option>
+        </select>
+      </div>
+      <div id="studentTableWrap"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ STUDENT PROFILE ═══ -->
+    <div class="section" id="sec-student-profile">
+      <div class="section-header">
+        <div>
+          <button onclick="navTo('students',document.querySelector('[data-page=students]'))" style="background:none;color:var(--primary);font-size:13px;font-weight:700">← Back to Students</button>
+          <h2 id="spName" style="margin-top:6px">Student Profile</h2>
+        </div>
+      </div>
+      <div id="studentProfileContent"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ ITEM REPORTS ═══ -->
+    <div class="section" id="sec-items">
+      <div class="section-header">
+        <div><h2>Item Reports</h2><p>Review, approve and manage all reports</p></div>
+      </div>
+      <div class="table-toolbar">
+        <input class="search-input" id="itemSearch" placeholder="Search title, location…" oninput="debounce(()=>loadItems(),400)">
+        <select class="filter-select" id="itemStatusFilter" onchange="loadItems()">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="returned">Returned</option>
+        </select>
+        <select class="filter-select" id="itemTypeFilter" onchange="loadItems()">
+          <option value="all">Lost &amp; Found</option>
+          <option value="lost">Lost</option>
+          <option value="found">Found</option>
+        </select>
+      </div>
+      <div id="itemTableWrap"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ CLAIMS ═══ -->
+    <div class="section" id="sec-claims">
+      <div class="section-header">
+        <div><h2>Claim Management</h2><p>Review ownership claims and verification answers</p></div>
+      </div>
+      <div class="table-toolbar">
+        <input class="search-input" id="claimSearch" placeholder="Search item or claimant…" oninput="debounce(()=>loadClaims(),400)">
+        <select class="filter-select" id="claimStatusFilter" onchange="loadClaims()">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div id="claimTableWrap"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ SMART MATCHES ═══ -->
+    <div class="section" id="sec-matches">
+      <div class="section-header">
+        <div><h2>Smart Matching</h2><p>AI-computed lost-and-found match confidence scores</p></div>
+      </div>
+      <div id="matchTableWrap"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ CONTRIBUTIONS ═══ -->
+    <div class="section" id="sec-contributions">
+      <div class="section-header">
+        <div><h2>Contribution Points</h2><p>Top contributors and full award history</p></div>
+      </div>
+      <div id="contribContent"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ MONTHLY REWARDS ═══ -->
+    <div class="section" id="sec-rewards">
+      <div class="section-header">
+        <div><h2>Monthly Rewards</h2><p>Manage food coupon rewards for top monthly finders</p></div>
+      </div>
+      <div id="rewardContent"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ ANALYTICS ═══ -->
+    <div class="section" id="sec-analytics">
+      <div class="section-header">
+        <div><h2>Analytics</h2><p>Report trends, recovery rates and contribution stats</p></div>
+      </div>
+      <div id="analyticsContent"><div class="loading-box"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ═══ AUDIT LOG ═══ -->
+    <div class="section" id="sec-auditlog">
+      <div class="section-header">
+        <div><h2>Audit Log</h2><p>Immutable record of all admin actions</p></div>
+        <select class="filter-select" id="auditActionFilter" onchange="loadAuditLog()">
+          <option value="all">All actions</option>
+          <option value="ITEM_APPROVED">Item Approved</option>
+          <option value="ITEM_REJECTED">Item Rejected</option>
+          <option value="ITEM_RETURNED">Item Returned</option>
+          <option value="CLAIM_APPROVED">Claim Approved</option>
+          <option value="CLAIM_REJECTED">Claim Rejected</option>
+          <option value="USER_SUSPENDED">User Suspended</option>
+          <option value="USER_UNSUSPENDED">User Unsuspended</option>
+          <option value="REWARD_ISSUED">Reward Issued</option>
+          <option value="REWARD_REDEEMED">Reward Redeemed</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="auditLogWrap">
+        <div class="loading-box"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </div><!-- page-content -->
+</div><!-- main-content -->
+</div><!-- admin-layout -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Item status modal -->
+<div class="modal-overlay" id="modalItemStatus">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalItemStatus')">×</button>
+    <h2 id="modalItemTitle">Update Status</h2>
+    <form onsubmit="submitItemStatus(event)">
+      <input type="hidden" id="modalItemId">
+      <label class="form-label">New Status</label>
+      <select class="form-input" id="modalItemNewStatus">
+        <option value="approved">Approve</option>
+        <option value="rejected">Reject</option>
+        <option value="returned">Mark as Returned</option>
+        <option value="cancelled">Cancel</option>
+      </select>
+      <label class="form-label">Admin Note / Reason</label>
+      <textarea class="form-input" id="modalItemNote" placeholder="Reason (shown to student if rejecting)…"></textarea>
+      <button type="submit" class="btn-primary" id="modalItemBtn">Update Status</button>
+      <p class="form-msg" id="modalItemMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Claim decision modal -->
+<div class="modal-overlay" id="modalClaim">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalClaim')">×</button>
+    <h2 id="modalClaimTitle">Review Claim</h2>
+    <div id="modalClaimDetail" style="margin-bottom:16px"></div>
+    <form onsubmit="submitClaimDecision(event)">
+      <input type="hidden" id="modalClaimId">
+      <label class="form-label">Decision</label>
+      <select class="form-input" id="modalClaimStatus">
+        <option value="approved">Approve – ownership verified</option>
+        <option value="rejected">Reject – ownership not verified</option>
+      </select>
+      <label class="form-label">Admin Note (shown to student)</label>
+      <textarea class="form-input" id="modalClaimNote" placeholder="Reason for rejection, or collection instructions…"></textarea>
+      <button type="submit" class="btn-primary" id="modalClaimBtn">Submit Decision</button>
+      <p class="form-msg" id="modalClaimMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Reward issue modal -->
+<div class="modal-overlay" id="modalReward">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalReward')">×</button>
+    <h2 id="modalRewardTitle">Issue Food Coupon</h2>
+    <form onsubmit="submitRewardIssue(event)">
+      <input type="hidden" id="modalRewardId">
+      <label class="form-label">Coupon Code (real code — not auto-generated)</label>
+      <input class="form-input" id="modalCouponCode" required placeholder="e.g. KPRLUNCH200">
+      <label class="form-label">Reward Title</label>
+      <input class="form-input" id="modalRewardTitle2" value="Monthly Finder Champion Reward">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="modalRewardDesc" placeholder="₹200 food coupon at Olive Dining…"></textarea>
+      <label class="form-label">Value (₹)</label>
+      <input class="form-input" type="number" id="modalRewardValue" value="200" min="1">
+      <label class="form-label">Expiry Date</label>
+      <input class="form-input" type="date" id="modalRewardExpiry">
+      <label class="form-label">Admin Note</label>
+      <textarea class="form-input" id="modalRewardNote" placeholder="Optional…"></textarea>
+      <button type="submit" class="btn-primary" id="modalRewardBtn">Issue Coupon</button>
+      <p class="form-msg" id="modalRewardMsg"></p>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// LOSTLINK ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+const API  = 'http://localhost:5000/api';
+let token  = null;
+let admin  = null;
+let currentSection = 'login';
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+async function api(method, path, body=null) {
+  const hdrs = {'Content-Type':'application/json'};
+  if (token) hdrs.Authorization = 'Bearer '+token;
+  const opts = {method, headers:hdrs};
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(API+path, opts);
+    const d = await r.json();
+    return {ok:r.ok, status:r.status, data:d};
+  } catch(e) {
+    return {ok:false, status:0, data:{success:false, message:'Network error'}};
+  }
+}
+
+function esc(s){ if(!s)return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+function td(d){ if(!d)return '—'; return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) }
+function ago(d){ if(!d)return ''; const s=Math.floor((Date.now()-new Date(d))/1000); if(s<60)return 'just now'; const m=Math.floor(s/60); if(m<60)return m+'m ago'; const h=Math.floor(m/60); if(h<24)return h+'h ago'; return Math.floor(h/24)+'d ago' }
+function pill(status){ const m={'pending':'pending','approved':'approved','rejected':'rejected','returned':'returned','cancelled':'cancelled','lost':'lost','found':'found','active':'active','suspended':'suspended','issued':'issued','confirmed':'confirmed','pending_review':'pending-review'}; return `<span class="pill pill-${m[status]||'pending'}">${status.replace('_',' ')}</span>` }
+function toast(msg,type='info'){ const t=document.getElementById('toast'); t.textContent=msg; t.className=`toast ${type} show`; setTimeout(()=>t.classList.remove('show'),3200) }
+function openModal(id){ document.getElementById(id).classList.add('open') }
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+function loading(id){ document.getElementById(id).innerHTML='<div class="loading-box"><div class="spinner"></div></div>' }
+let _dt = {}
+function debounce(fn,ms){ clearTimeout(_dt[fn]); _dt[fn]=setTimeout(fn,ms) }
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+setInterval(()=>{
+  document.getElementById('topbarClock').textContent =
+    new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+},1000);
+
+// ── Session ───────────────────────────────────────────────────────────────────
+function saveSession(t,u){ token=t; admin=u; localStorage.setItem('ll_admin_token',t); localStorage.setItem('ll_admin_user',JSON.stringify(u)) }
+function restoreSession(){
+  token = localStorage.getItem('ll_admin_token');
+  const u = localStorage.getItem('ll_admin_user');
+  if(token && u){ admin=JSON.parse(u); bootDashboard(); }
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+async function doAdminLogin(e){
+  e.preventDefault();
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Logging in…';
+  const err=document.getElementById('loginErr');
+  err.textContent='';
+
+  const {ok,data} = await api('POST','/auth/login',{
+    email: document.getElementById('loginEmail').value.trim(),
+    password: document.getElementById('loginPassword').value
+  });
+
+  btn.disabled=false; btn.textContent='Log in to Admin Panel';
+
+  if(!ok||!data.success){ err.textContent=data.message||'Login failed'; return; }
+  if(data.user.role !== 'admin'){ err.textContent='Access denied – admin accounts only'; return; }
+
+  saveSession(data.token, data.user);
+  bootDashboard();
+}
+
+function bootDashboard(){
+  // hide login, show app shell
+  document.getElementById('sec-login').classList.remove('active');
+  document.querySelector('.sidebar').style.display='flex';
+  document.querySelector('.topbar').style.display='flex';
+  document.getElementById('sidebarAvatar').textContent = (admin.name||'A').charAt(0).toUpperCase();
+  document.getElementById('sidebarName').textContent   = admin.name||'Admin';
+  document.getElementById('sidebarEmail').textContent  = admin.email||'';
+  navTo('dashboard', document.querySelector('[data-page=dashboard]'));
+}
+
+function adminLogout(){
+  token=null; admin=null;
+  localStorage.removeItem('ll_admin_token');
+  localStorage.removeItem('ll_admin_user');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-login').classList.add('active');
+  document.getElementById('topbarTitle').textContent='Admin Login';
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+const SECTIONS = {
+  dashboard:'Dashboard', students:'Students', 'student-profile':'Student Profile',
+  items:'Item Reports', claims:'Claims', matches:'Smart Matches',
+  contributions:'Contributions', rewards:'Monthly Rewards',
+  analytics:'Analytics', auditlog:'Audit Log'
+};
+
+function navTo(name, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  const sec = document.getElementById('sec-'+name);
+  if(sec) sec.classList.add('active');
+  if(el) el.classList.add('active');
+  currentSection = name;
+  document.getElementById('topbarTitle').textContent = SECTIONS[name]||name;
+  // load data
+  const loaders = {
+    dashboard: loadDashboard, students: loadStudents,
+    items: loadItems, claims: loadClaims,
+    matches: loadMatches, contributions: loadContributions,
+    rewards: loadRewards, analytics: loadAnalytics,
+    auditlog: loadAuditLog
+  };
+  if(loaders[name]) loaders[name]();
+}
+
+function refreshCurrentSection(){ navTo(currentSection, document.querySelector(`[data-page=${currentSection}]`)) }
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  loading('statGrid'); loading('dashGrid');
+  const {ok,data} = await api('GET','/admin/stats');
+  if(!ok||!data.success){ document.getElementById('statGrid').innerHTML='<p style="color:var(--danger)">Failed to load stats.</p>'; return; }
+  const s = data.stats;
+
+  // update sidebar badges
+  document.getElementById('sbBadgePending').textContent = s.pendingItems;
+  document.getElementById('sbBadgeClaims').textContent  = s.pendingClaims;
+  if(s.pendingRewards>0){ document.getElementById('sbBadgeRewards').style.display=''; document.getElementById('sbBadgeRewards').textContent=s.pendingRewards; }
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card c-warning"><div class="stat-card-num">${s.pendingItems}</div><div class="stat-card-label">Pending Reports</div></div>
+    <div class="stat-card c-success"><div class="stat-card-num">${s.approvedItems}</div><div class="stat-card-label">Approved Reports</div></div>
+    <div class="stat-card c-primary"><div class="stat-card-num">${s.returnedItems}</div><div class="stat-card-label">Items Returned</div></div>
+    <div class="stat-card"><div class="stat-card-num">${s.totalLostItems}</div><div class="stat-card-label">Lost Reports</div></div>
+    <div class="stat-card"><div class="stat-card-num">${s.totalFoundItems}</div><div class="stat-card-label">Found Reports</div></div>
+    <div class="stat-card c-danger"><div class="stat-card-num">${s.rejectedItems}</div><div class="stat-card-label">Rejected Reports</div></div>
+    <div class="stat-card"><div class="stat-card-num">${s.totalUsers}</div><div class="stat-card-label">Total Students</div></div>
+    <div class="stat-card c-success"><div class="stat-card-num">${s.activeUsers}</div><div class="stat-card-label">Active Students</div></div>
+    <div class="stat-card c-danger"><div class="stat-card-num">${s.suspendedUsers}</div><div class="stat-card-label">Suspended</div></div>
+    <div class="stat-card c-warning"><div class="stat-card-num">${s.pendingClaims}</div><div class="stat-card-label">Pending Claims</div></div>
+    <div class="stat-card"><div class="stat-card-num">${s.totalClaims}</div><div class="stat-card-label">Total Claims</div></div>
+    <div class="stat-card c-primary"><div class="stat-card-num">${s.totalPointsAwarded}</div><div class="stat-card-label">Points Awarded</div></div>`;
+
+  // Recent items + claims
+  const recentItems  = (data.recentItems||[]).map(i=>`
+    <tr><td><strong>${esc(i.title)}</strong><br><small>${esc(i.location)}</small></td>
+    <td>${pill(i.type)}</td>
+    <td><small>${esc(i.reportedBy?.name||'—')}</small></td>
+    <td>${ago(i.createdAt)}</td>
+    <td><button class="act-btn issue" onclick="openItemStatus('${i._id}','${esc(i.title)}')">Review</button></td></tr>`).join('');
+
+  const recentClaims = (data.recentClaims||[]).map(c=>`
+    <tr><td><strong>${esc(c.item?.title||'—')}</strong></td>
+    <td>${esc(c.claimant?.name||'—')}</td>
+    <td>${pill('pending')}</td>
+    <td><button class="act-btn issue" onclick="openClaimModal('${c._id}','${esc(c.item?.title||'')}')">Review</button></td></tr>`).join('');
+
+  document.getElementById('dashGrid').innerHTML = `
+    <div class="dash-card">
+      <h3>⏳ Pending Reports</h3>
+      ${recentItems ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Type</th><th>Reporter</th><th>Posted</th><th>Action</th></tr></thead><tbody>${recentItems}</tbody></table></div>` : '<div class="empty-state"><span class="es-icon">✅</span><p>No pending reports!</p></div>'}
+    </div>
+    <div class="dash-card">
+      <h3>📋 Pending Claims</h3>
+      ${recentClaims ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Claimant</th><th>Status</th><th>Action</th></tr></thead><tbody>${recentClaims}</tbody></table></div>` : '<div class="empty-state"><span class="es-icon">✅</span><p>No pending claims!</p></div>'}
+    </div>
+    <div class="dash-card" style="grid-column:1/-1">
+      <h3>📊 Quick Stats</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:4px">
+        <div style="background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Smart Matches</div>
+          <div style="font-size:22px;font-weight:800;color:var(--primary)">${s.totalMatches}</div>
+          <div style="font-size:10px;color:var(--warning);margin-top:3px">${s.unsentMatches} notifications pending</div>
+        </div>
+        <div style="background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Return Rate</div>
+          <div style="font-size:22px;font-weight:800;color:var(--success)">${s.totalFoundItems>0?Math.round((s.returnedItems/s.totalFoundItems)*100):0}%</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${s.returnedItems} of ${s.totalFoundItems} found items returned</div>
+        </div>
+        <div style="background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Pending Rewards</div>
+          <div style="font-size:22px;font-weight:800;color:var(--warning)">${s.pendingRewards}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${s.issuedRewards} coupons active</div>
+        </div>
+        <div style="background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Claim Rate</div>
+          <div style="font-size:22px;font-weight:800;color:var(--primary)">${s.totalClaims>0?Math.round((s.approvedClaims/s.totalClaims)*100):0}%</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${s.approvedClaims} approved of ${s.totalClaims}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── STUDENTS ──────────────────────────────────────────────────────────────────
+let stuPage=1, stuTotal=0;
+async function loadStudents(){
+  loading('studentTableWrap');
+  const search = document.getElementById('stuSearch').value.trim();
+  const status = document.getElementById('stuStatus').value;
+  const qs     = new URLSearchParams({page:stuPage,limit:20,search,status});
+  const {ok,data} = await api('GET',`/admin/users?${qs}`);
+  if(!ok||!data.success){ document.getElementById('studentTableWrap').innerHTML='<p style="color:var(--danger);padding:16px">Failed to load students.</p>'; return; }
+
+  stuTotal = data.total;
+  const rows = (data.users||[]).map(u=>`<tr>
+    <td><strong>${esc(u.name)}</strong><br><small>${esc(u.email)}</small></td>
+    <td>${esc(u.section||'—')}</td>
+    <td>${pill(u.isSuspended?'suspended':'active')}</td>
+    <td><strong>${u.contributionPoints}</strong><br><small>${esc(u.contributionLevel)}</small></td>
+    <td>${u.totalFoundReports} found / ${u.verifiedFoundReports} verified</td>
+    <td>${td(u.createdAt)}</td>
+    <td>
+      <div class="act-btn-row">
+        <button class="act-btn view"    onclick="viewStudentProfile('${u._id}')">Profile</button>
+        ${u.isSuspended
+          ? `<button class="act-btn approve" onclick="toggleSuspend('${u._id}',false,'${esc(u.name)}')">Unsuspend</button>`
+          : `<button class="act-btn reject"  onclick="toggleSuspend('${u._id}',true,'${esc(u.name)}')">Suspend</button>`}
+      </div>
+    </td></tr>`).join('');
+
+  const total = data.total;
+  const pages = Math.ceil(total/20);
+  document.getElementById('studentTableWrap').innerHTML = `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Student</th><th>Section</th><th>Status</th><th>Points</th><th>Reports</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No students found.</td></tr>'}</tbody>
+      </table>
+      <div class="pagination">
+        <span>${total} student${total!==1?'s':''}</span>
+        <div class="pagination-btns">
+          <button class="page-btn" onclick="stuPage=Math.max(1,stuPage-1);loadStudents()" ${stuPage<=1?'disabled':''}>← Prev</button>
+          <span style="padding:0 10px;font-size:12px">Page ${stuPage} of ${pages||1}</span>
+          <button class="page-btn" onclick="stuPage++;loadStudents()" ${stuPage>=pages?'disabled':''}>Next →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function toggleSuspend(id, suspend, name){
+  if(!confirm(`${suspend?'Suspend':'Reactivate'} ${name}?`)) return;
+  const {ok,data} = await api('PATCH',`/admin/users/${id}/suspend`,{isSuspended:suspend});
+  toast(data.message||(ok?'Done':'Failed'), ok?'success':'error');
+  if(ok) loadStudents();
+}
+
+async function viewStudentProfile(id){
+  navTo('student-profile', null);
+  loading('studentProfileContent');
+  const {ok,data} = await api('GET',`/admin/users/${id}`);
+  if(!ok||!data.success){ document.getElementById('studentProfileContent').innerHTML='<p style="color:var(--danger)">Failed to load profile.</p>'; return; }
+  const u=data.user, items=data.items||[], claims=data.claims||[], contribs=data.contributions||[];
+
+  document.getElementById('spName').textContent = u.name;
+
+  const itemRows = items.map(i=>`<tr>
+    <td>${esc(i.title)}</td><td>${pill(i.type)}</td>
+    <td>📍 ${esc(i.location)}</td><td>${pill(i.status)}</td><td>${td(i.createdAt)}</td>
+    <td><button class="act-btn view" onclick="openItemStatus('${i._id}','${esc(i.title)}')">Update</button></td></tr>`).join('');
+
+  const claimRows = claims.map(c=>`<tr>
+    <td>${esc(c.item?.title||'—')}</td><td>${pill(c.status)}</td><td>${td(c.createdAt)}</td></tr>`).join('');
+
+  const contribRows = contribs.map(c=>`<tr>
+    <td>${esc(c.item?.title||'—')}</td>
+    <td><span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--primary-light);color:var(--primary)">${c.action==='ITEM_RETURNED'?'🏆 Returned':'✅ Approved'}</span></td>
+    <td class="pts-cell" style="font-size:16px;font-weight:800;color:var(--primary)">+${c.points}</td>
+    <td>${td(c.createdAt)}</td></tr>`).join('');
+
+  document.getElementById('studentProfileContent').innerHTML = `
+    <div class="student-panel">
+      <div class="student-panel-header">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:22px;font-weight:800">${u.name.charAt(0).toUpperCase()}</div>
+          <div>
+            <h3>${esc(u.name)}</h3>
+            <div style="opacity:.8;font-size:13px;margin-top:2px">${esc(u.email)}</div>
+            <div style="opacity:.7;font-size:12px;margin-top:4px">${esc(u.section||'')} • ${pill(u.isSuspended?'suspended':'active')}</div>
+          </div>
+        </div>
+      </div>
+      <div class="student-panel-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+          <div style="text-align:center;padding:14px;background:var(--soft);border-radius:10px">
+            <div style="font-size:24px;font-weight:800;color:var(--primary)">${u.contributionPoints}</div>
+            <div style="font-size:11px;color:var(--muted)">Points</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--soft);border-radius:10px">
+            <div style="font-size:24px;font-weight:800;color:var(--success)">${u.verifiedFoundReports}</div>
+            <div style="font-size:11px;color:var(--muted)">Verified</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--soft);border-radius:10px">
+            <div style="font-size:24px;font-weight:800;color:var(--primary)">${u.successfullyReturnedItems}</div>
+            <div style="font-size:11px;color:var(--muted)">Returned</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--soft);border-radius:10px">
+            <div style="font-size:24px;font-weight:800">${u.totalFoundReports}</div>
+            <div style="font-size:11px;color:var(--muted)">Found Reports</div>
+          </div>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <strong style="font-size:14px">Reports (${items.length})</strong>
+            ${u.isSuspended
+              ? `<button class="act-btn approve" onclick="toggleSuspend('${u._id}',false,'${esc(u.name)}')">Unsuspend</button>`
+              : `<button class="act-btn reject"  onclick="toggleSuspend('${u._id}',true,'${esc(u.name)}')">Suspend Account</button>`}
+          </div>
+          ${itemRows ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>${itemRows}</tbody></table></div>` : '<p style="color:var(--muted);font-size:13px">No reports.</p>'}
+        </div>
+        <div style="margin-bottom:20px">
+          <strong style="font-size:14px;display:block;margin-bottom:10px">Claims (${claims.length})</strong>
+          ${claimRows ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Status</th><th>Date</th></tr></thead><tbody>${claimRows}</tbody></table></div>` : '<p style="color:var(--muted);font-size:13px">No claims.</p>'}
+        </div>
+        <div>
+          <strong style="font-size:14px;display:block;margin-bottom:10px">Points History (${contribs.length})</strong>
+          ${contribRows ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Item</th><th>Action</th><th>Points</th><th>Date</th></tr></thead><tbody>${contribRows}</tbody></table></div>` : '<p style="color:var(--muted);font-size:13px">No points yet.</p>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── ITEM REPORTS ──────────────────────────────────────────────────────────────
+let itemPage=1;
+async function loadItems(){
+  loading('itemTableWrap');
+  const search = document.getElementById('itemSearch').value.trim();
+  const status = document.getElementById('itemStatusFilter').value;
+  const type   = document.getElementById('itemTypeFilter').value;
+  const qs     = new URLSearchParams({page:itemPage,limit:25,status,type});
+  if(search) qs.set('search',search);
+  const {ok,data} = await api('GET',`/admin/items?${qs}`);
+  if(!ok||!data.success){ document.getElementById('itemTableWrap').innerHTML='<p style="color:var(--danger);padding:16px">Failed.</p>'; return; }
+
+  const pages = Math.ceil((data.total||0)/25);
+  const rows = (data.items||[]).map(i=>`<tr>
+    <td>
+      ${i.imageUrl?`<img src="${esc(i.imageUrl)}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;float:left;margin-right:10px">`:''} 
+      <strong>${esc(i.title)}</strong><br>
+      <small>${esc(i.description||'').substring(0,60)}${(i.description||'').length>60?'…':''}</small>
+    </td>
+    <td>${pill(i.type)}</td>
+    <td>${esc(i.category)}</td>
+    <td>📍 ${esc(i.location)}</td>
+    <td><strong>${esc(i.reportedBy?.name||'—')}</strong><br><small>${esc(i.reportedBy?.email||'')}</small></td>
+    <td>${pill(i.status)}${i.adminNote?`<br><small style="color:var(--muted)">${esc(i.adminNote)}</small>`:''}</td>
+    <td>${td(i.createdAt)}</td>
+    <td>
+      <div class="act-btn-row">
+        <button class="act-btn view"   onclick="window.open('/?item=${i._id}','_blank')">View</button>
+        <button class="act-btn issue"  onclick="openItemStatus('${i._id}','${esc(i.title)}')">Update</button>
+      </div>
+    </td></tr>`).join('');
+
+  document.getElementById('itemTableWrap').innerHTML = `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Item</th><th>Type</th><th>Category</th><th>Location</th><th>Reporter</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">No items found.</td></tr>'}</tbody>
+      </table>
+      <div class="pagination">
+        <span>${data.total||0} report${data.total!==1?'s':''}</span>
+        <div class="pagination-btns">
+          <button class="page-btn" onclick="itemPage=Math.max(1,itemPage-1);loadItems()" ${itemPage<=1?'disabled':''}>← Prev</button>
+          <span style="padding:0 10px;font-size:12px">Page ${itemPage} of ${pages||1}</span>
+          <button class="page-btn" onclick="itemPage++;loadItems()" ${itemPage>=pages?'disabled':''}>Next →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function openItemStatus(id, title){
+  document.getElementById('modalItemId').value     = id;
+  document.getElementById('modalItemTitle').textContent = 'Update: '+title;
+  document.getElementById('modalItemNote').value   = '';
+  document.getElementById('modalItemMsg').textContent = '';
+  openModal('modalItemStatus');
+}
+
+async function submitItemStatus(e){
+  e.preventDefault();
+  const btn = document.getElementById('modalItemBtn');
+  btn.disabled=true; btn.textContent='Updating…';
+  const id     = document.getElementById('modalItemId').value;
+  const status = document.getElementById('modalItemNewStatus').value;
+  const note   = document.getElementById('modalItemNote').value.trim();
+
+  if((status==='rejected'||status==='returned')&&!note){
+    document.getElementById('modalItemMsg').textContent='Please provide a reason/note.';
+    document.getElementById('modalItemMsg').className='form-msg err';
+    btn.disabled=false; btn.textContent='Update Status'; return;
+  }
+
+  const {ok,data} = await api('PATCH',`/admin/items/${id}/status`,{status,adminNote:note});
+  btn.disabled=false; btn.textContent='Update Status';
+  if(ok&&data.success){
+    toast(`Item ${status} successfully`,'success');
+    closeModal('modalItemStatus');
+    loadItems(); loadDashboard();
+  } else {
+    document.getElementById('modalItemMsg').textContent=data.message||'Failed';
+    document.getElementById('modalItemMsg').className='form-msg err';
+  }
+}
+
+// ── CLAIMS ────────────────────────────────────────────────────────────────────
+let claimPage=1;
+async function loadClaims(){
+  loading('claimTableWrap');
+  const status = document.getElementById('claimStatusFilter').value;
+  const qs     = new URLSearchParams({page:claimPage,limit:25,status});
+  const {ok,data} = await api('GET',`/admin/claims?${qs}`);
+  if(!ok||!data.success){ document.getElementById('claimTableWrap').innerHTML='<p style="color:var(--danger);padding:16px">Failed.</p>'; return; }
+
+  const pages = Math.ceil((data.total||0)/25);
+  const rows = (data.claims||[]).map(c=>`<tr>
+    <td><strong>${esc(c.item?.title||'—')}</strong><br><small>📍 ${esc(c.item?.location||'')}</small><br>${pill(c.item?.type||'found')}</td>
+    <td><strong>${esc(c.claimant?.name||'—')}</strong><br><small>${esc(c.claimant?.email||'')}</small><br><small>${esc(c.claimant?.section||'')}</small></td>
+    <td>
+      <div class="answer-reveal">
+        <span class="answer-label">🔐 Ownership Description</span>
+        <em style="font-size:12px">${esc(c.verificationAnswer||'(not provided)')}</em>
+      </div>
+      ${c.additionalInfo?`<div style="margin-top:6px;font-size:11px;color:var(--muted)">Additional: ${esc(c.additionalInfo)}</div>`:''}
+    </td>
+    <td>${pill(c.status)}${c.adminNote?`<br><small style="color:var(--muted);margin-top:3px;display:block">${esc(c.adminNote)}</small>`:''}</td>
+    <td>${td(c.createdAt)}</td>
+    <td>
+      ${c.status==='pending'
+        ? `<div class="act-btn-row"><button class="act-btn approve" onclick="openClaimModal('${c._id}','${esc(c.item?.title||'')}')">Review</button></div>`
+        : `<span style="color:var(--muted);font-size:12px">${c.status}</span>`}
+    </td></tr>`).join('');
+
+  document.getElementById('claimTableWrap').innerHTML = `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Item</th><th>Claimant</th><th>Verification Answer</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">No claims found.</td></tr>'}</tbody>
+      </table>
+      <div class="pagination">
+        <span>${data.total||0} claim${data.total!==1?'s':''}</span>
+        <div class="pagination-btns">
+          <button class="page-btn" onclick="claimPage=Math.max(1,claimPage-1);loadClaims()" ${claimPage<=1?'disabled':''}>← Prev</button>
+          <span style="padding:0 10px;font-size:12px">Page ${claimPage} of ${pages||1}</span>
+          <button class="page-btn" onclick="claimPage++;loadClaims()" ${claimPage>=pages?'disabled':''}>Next →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function openClaimModal(id, title){
+  document.getElementById('modalClaimId').value       = id;
+  document.getElementById('modalClaimTitle').textContent = 'Review Claim: '+title;
+  document.getElementById('modalClaimNote').value     = '';
+  document.getElementById('modalClaimMsg').textContent  = '';
+  document.getElementById('modalClaimDetail').innerHTML = `<p style="font-size:13px;color:var(--muted)">Compare the claimant's answer (visible in the claims table) against the finder's private verification detail. Approve only if they match.</p>`;
+  openModal('modalClaim');
+}
+
+async function submitClaimDecision(e){
+  e.preventDefault();
+  const btn = document.getElementById('modalClaimBtn');
+  btn.disabled=true; btn.textContent='Submitting…';
+  const id     = document.getElementById('modalClaimId').value;
+  const status = document.getElementById('modalClaimStatus').value;
+  const note   = document.getElementById('modalClaimNote').value.trim();
+
+  if(status==='rejected' && !note){
+    document.getElementById('modalClaimMsg').textContent='Please provide a rejection reason.';
+    document.getElementById('modalClaimMsg').className='form-msg err';
+    btn.disabled=false; btn.textContent='Submit Decision'; return;
+  }
+
+  const {ok,data} = await api('PATCH',`/admin/claims/${id}`,{status,adminNote:note});
+  btn.disabled=false; btn.textContent='Submit Decision';
+  if(ok&&data.success){
+    toast(`Claim ${status}`,'success');
+    closeModal('modalClaim');
+    loadClaims(); loadDashboard();
+  } else {
+    document.getElementById('modalClaimMsg').textContent=data.message||'Failed';
+    document.getElementById('modalClaimMsg').className='form-msg err';
+  }
+}
+
+// ── SMART MATCHES ─────────────────────────────────────────────────────────────
+async function loadMatches(){
+  loading('matchTableWrap');
+  const {ok,data} = await api('GET','/admin/matches?limit=50');
+  if(!ok||!data.success){ document.getElementById('matchTableWrap').innerHTML='<p style="color:var(--danger);padding:16px">Failed.</p>'; return; }
+
+  if(!data.matches.length){
+    document.getElementById('matchTableWrap').innerHTML='<div class="empty-state"><span class="es-icon">🎯</span><p>No smart matches yet.<br><small>Matches are created when a found item is approved and compared against recent lost reports.</small></p></div>';
+    return;
+  }
+
+  const rows = data.matches.map(m=>{
+    const sb = m.scoreBreakdown||{};
+    const color = m.score>=80?'var(--success)':m.score>=60?'var(--warning)':'var(--danger)';
+    return `<tr>
+      <td>
+        <strong>${esc(m.foundItem?.title||'—')}</strong><br>
+        <small>By: ${esc(m.foundItem?.reportedBy?.name||'?')}</small><br>
+        <small>📍 ${esc(m.foundItem?.location||'')}</small><br>
+        <button class="act-btn view" style="margin-top:4px" onclick="window.open('/','_blank')">View</button>
+      </td>
+      <td>
+        <strong>${esc(m.lostItem?.title||'—')}</strong><br>
+        <small>By: ${esc(m.lostItem?.reportedBy?.name||'?')}</small><br>
+        <small>📍 ${esc(m.lostItem?.location||'')}</small>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <strong style="font-size:22px;color:${color}">${m.score}</strong>
+          <span class="pill pill-${m.score>=80?'approved':'pending'}">${m.label||'—'}</span>
+        </div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:${m.score}%;background:${color}"></div></div>
+        <div class="score-chips">
+          <span class="score-chip">Cat: <strong>${sb.category||0}</strong>/30</span>
+          <span class="score-chip">Title: <strong>${sb.title||0}</strong>/30</span>
+          <span class="score-chip">Desc: <strong>${sb.description||0}</strong>/20</span>
+          <span class="score-chip">Loc: <strong>${sb.location||0}</strong>/15</span>
+          <span class="score-chip">Date: <strong>${sb.date||0}</strong>/5</span>
+        </div>
+      </td>
+      <td>
+        ${m.notificationSent
+          ? `<span style="color:var(--success);font-weight:700">✅ Sent</span><br><small>${m.notificationSentAt?td(m.notificationSentAt):''}</small>`
+          : `<span style="color:var(--warning)">⏳ Pending</span><br><small>Sent on approval</small>`}
+      </td>
+      <td><small>${td(m.createdAt)}</small></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('matchTableWrap').innerHTML = `
+    <div style="margin-bottom:12px;padding:10px 14px;background:var(--soft);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--muted)">
+      ${data.total} match record${data.total!==1?'s':''}. Scores ≥ 80 = High confidence | 60–79 = Possible. Matching scores are calculated by the backend algorithm and cannot be manually edited.
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Found Item</th><th>Lost Item</th><th>Confidence Score</th><th>Notification</th><th>Matched On</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── CONTRIBUTIONS ─────────────────────────────────────────────────────────────
+async function loadContributions(){
+  loading('contribContent');
+  const [lbRes, histRes] = await Promise.all([
+    api('GET','/contributions/leaderboard?filter=overall&limit=10'),
+    api('GET','/admin/contributions?limit=50')
+  ]);
+
+  let html = '';
+
+  if(lbRes.ok && lbRes.data.success){
+    const badges = {'Starter Badge':'🏅','Bronze Badge':'🥉','Silver Badge':'🥈','Gold Badge':'🥇','Platinum Badge':'💎'};
+    const rows = (lbRes.data.leaderboard||[]).map(u=>{
+      const ico = u.rank===1?'🥇':u.rank===2?'🥈':u.rank===3?'🥉':`#${u.rank}`;
+      return `<tr class="${u.rank<=3?'lb-top':''}">
+        <td style="font-size:20px">${ico}</td>
+        <td><strong>${esc(u.name)}</strong><br><small>${esc(u.section||'—')}</small></td>
+        <td><span style="background:${u.contributionBadgeColor}20;color:${u.contributionBadgeColor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">${badges[u.contributionBadge]||'🏅'} ${esc(u.contributionBadge||'')}</span></td>
+        <td style="font-size:18px;font-weight:800;color:var(--primary)">${u.totalPoints}</td>
+        <td>${u.successfullyReturnedItems}</td>
+        <td><button class="act-btn view" onclick="viewStudentProfile('${u.userId}')">Profile</button></td>
+      </tr>`;
+    }).join('');
+    html += `
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:12px">🏆 Top Contributors</h3>
+      <div class="table-wrap" style="margin-bottom:28px">
+        <table class="data-table">
+          <thead><tr><th>Rank</th><th>Student</th><th>Badge</th><th>Lifetime Points</th><th>Returns</th><th>Profile</th></tr></thead>
+          <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">No data.</td></tr>'}</tbody>
+        </table>
+      </div>`;
+  }
+
+  if(histRes.ok && histRes.data.success){
+    const rows = (histRes.data.history||[]).map(h=>`<tr>
+      <td><strong>${esc(h.user?.name||'—')}</strong><br><small>${esc(h.user?.email||'')}</small></td>
+      <td>${esc(h.item?.title||'—')}</td>
+      <td><span style="padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;${h.action==='ITEM_RETURNED'?'background:var(--primary-light);color:var(--primary)':'background:#e8f8f0;color:var(--success)'}">${h.action==='ITEM_RETURNED'?'🏆 Item Returned':'✅ Report Approved'}</span></td>
+      <td style="font-size:16px;font-weight:800;color:var(--primary)">+${h.points}</td>
+      <td><strong>${h.user?.contributionPoints||0}</strong> total<br><small>${esc(h.user?.contributionLevel||'')}</small></td>
+      <td>${td(h.createdAt)}</td>
+    </tr>`).join('');
+    html += `
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:10px">📋 Full Points History</h3>
+      <div style="margin-bottom:12px;padding:10px 14px;background:var(--soft);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--muted)">
+        ${histRes.data.total} award records. Points are awarded automatically by the backend. Direct point editing is not permitted.
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Item</th><th>Action</th><th>Points</th><th>Running Total</th><th>Date</th></tr></thead>
+          <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">No records.</td></tr>'}</tbody>
+        </table>
+      </div>`;
+  }
+
+  document.getElementById('contribContent').innerHTML = html || '<div class="empty-state"><span class="es-icon">⭐</span><p>No contribution data yet.</p></div>';
+}
+
+// ── MONTHLY REWARDS ───────────────────────────────────────────────────────────
+async function loadRewards(){
+  loading('rewardContent');
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const {ok,data} = await api('GET','/admin/rewards?limit=30');
+
+  const triggerBox = `
+    <div style="background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px">
+      <strong style="font-size:14px">Manually calculate a month's champion</strong>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <select id="trigM" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px">
+          ${months.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}
+        </select>
+        <input type="number" id="trigY" value="${new Date().getFullYear()}" style="width:100px;padding:8px 12px;border:1px solid var(--border);border-radius:8px">
+        <button class="act-btn issue" onclick="triggerMonth()">Calculate Champion</button>
+      </div>
+      <p id="trigMsg" style="font-size:12px;margin-top:8px;color:var(--muted)"></p>
+    </div>`;
+
+  if(!ok||!data.success||!data.rewards.length){
+    document.getElementById('rewardContent').innerHTML = triggerBox + '<div class="empty-state"><span class="es-icon">🏆</span><p>No monthly reward records yet.</p></div>';
+    return;
+  }
+
+  const rows = data.rewards.map(r=>{
+    const actions = [];
+    if(r.status==='pending_review') actions.push(`<button class="act-btn approve" onclick="confirmWinner('${r._id}')">Confirm Winner</button>`);
+    if(r.status==='confirmed')      actions.push(`<button class="act-btn issue"   onclick="openRewardModal('${r._id}','${esc(months[r.month-1]+' '+r.year)}')">Issue Coupon</button>`);
+    if(r.status==='issued'){
+      actions.push(`<button class="act-btn view"    onclick="markRedeemed('${r._id}')">Mark Redeemed</button>`);
+      actions.push(`<button class="act-btn reject"  onclick="markExpired('${r._id}')">Expire</button>`);
+    }
+    return `<tr>
+      <td><strong>${months[r.month-1]} ${r.year}</strong></td>
+      <td>${esc(r.winner?.name||r.winnerName||'—')}<br><small>${esc(r.winner?.section||r.winnerSection||'')}</small></td>
+      <td style="font-size:16px;font-weight:800;color:var(--primary)">${r.monthlyPoints}</td>
+      <td>${r.successfulReturns}</td>
+      <td>${pill(r.status)}</td>
+      <td>${r.couponCode?`<code style="font-size:11px;background:var(--soft);padding:2px 6px;border-radius:4px">${esc(r.couponCode)}</code>`:'—'}</td>
+      <td><div class="act-btn-row">${actions.join('')}</div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('rewardContent').innerHTML = triggerBox + `
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Month</th><th>Winner</th><th>Monthly Pts</th><th>Returns</th><th>Status</th><th>Coupon</th><th>Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+async function triggerMonth(){
+  const m=document.getElementById('trigM').value;
+  const y=document.getElementById('trigY').value;
+  document.getElementById('trigMsg').textContent='Calculating…';
+  const {ok,data}=await api('POST','/admin/rewards/trigger',{month:parseInt(m),year:parseInt(y)});
+  document.getElementById('trigMsg').textContent=data.message||(ok?'Done':'Failed');
+  if(ok){ setTimeout(loadRewards,600); loadDashboard(); }
+}
+
+async function confirmWinner(id){
+  if(!confirm('Confirm this monthly winner?')) return;
+  const {ok,data}=await api('PATCH',`/admin/rewards/${id}/confirm`,{});
+  toast(data.message||(ok?'Confirmed':'Failed'), ok?'success':'error');
+  if(ok){ loadRewards(); loadDashboard(); }
+}
+
+function openRewardModal(id, label){
+  document.getElementById('modalRewardId').value=id;
+  document.getElementById('modalRewardTitle').textContent='Issue Coupon – '+label;
+  document.getElementById('modalCouponCode').value='';
+  document.getElementById('modalRewardMsg').textContent='';
+  openModal('modalReward');
+}
+
+async function submitRewardIssue(e){
+  e.preventDefault();
+  const btn=document.getElementById('modalRewardBtn');
+  btn.disabled=true; btn.textContent='Issuing…';
+  const id  = document.getElementById('modalRewardId').value;
+  const {ok,data}=await api('PATCH',`/admin/rewards/${id}/issue`,{
+    couponCode:       document.getElementById('modalCouponCode').value.trim(),
+    rewardTitle:      document.getElementById('modalRewardTitle2').value.trim(),
+    rewardDescription:document.getElementById('modalRewardDesc').value.trim(),
+    rewardValue:      parseInt(document.getElementById('modalRewardValue').value,10),
+    expiryDate:       document.getElementById('modalRewardExpiry').value||null,
+    adminNote:        document.getElementById('modalRewardNote').value.trim()
+  });
+  btn.disabled=false; btn.textContent='Issue Coupon';
+  if(ok&&data.success){
+    toast('Coupon issued!','success'); closeModal('modalReward'); loadRewards(); loadDashboard();
+  } else {
+    document.getElementById('modalRewardMsg').textContent=data.message||'Failed';
+    document.getElementById('modalRewardMsg').className='form-msg err';
+  }
+}
+
+async function markRedeemed(id){
+  if(!confirm('Mark this coupon as redeemed?')) return;
+  const {ok,data}=await api('PATCH',`/admin/rewards/${id}/redeem`,{});
+  toast(data.message||(ok?'Done':'Failed'), ok?'success':'error');
+  if(ok) loadRewards();
+}
+
+async function markExpired(id){
+  if(!confirm('Mark as expired?')) return;
+  const {ok,data}=await api('PATCH',`/admin/rewards/${id}/expire`,{});
+  toast(data.message||(ok?'Done':'Failed'), ok?'success':'error');
+  if(ok) loadRewards();
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────────────────────────
+async function loadAnalytics(){
+  loading('analyticsContent');
+  const {ok,data} = await api('GET','/admin/analytics');
+  if(!ok||!data.success){ document.getElementById('analyticsContent').innerHTML='<p style="color:var(--danger);padding:16px">Failed.</p>'; return; }
+
+  const a = data.analytics;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Build report trend chart data
+  const trendMap = {};
+  (a.reportTrend||[]).forEach(r=>{
+    const key=`${r._id.year}-${r._id.month}`;
+    if(!trendMap[key]) trendMap[key]={lost:0,found:0,month:months[r._id.month-1]};
+    trendMap[key][r._id.type]=r.count;
+  });
+  const trendKeys  = Object.keys(trendMap).sort();
+  const maxReports = Math.max(1,...trendKeys.map(k=>trendMap[k].lost+trendMap[k].found));
+
+  const barChart = trendKeys.map(k=>{
+    const d=trendMap[k];
+    const hLost =(d.lost /maxReports)*160;
+    const hFound=(d.found/maxReports)*160;
+    return `<div style="display:flex;flex-direction:column-reverse;align-items:center;gap:2px;flex:1;position:relative">
+      <div style="height:${hFound}px;width:100%;background:#c7f0dd;border-radius:4px 4px 0 0" title="Found: ${d.found}"></div>
+      <div style="height:${hLost}px;width:100%;background:var(--primary-light);border-radius:4px 4px 0 0" title="Lost: ${d.lost}"></div>
+      <div style="position:absolute;bottom:-18px;font-size:9px;color:var(--muted)">${d.month}</div>
+    </div>`;
+  }).join('');
+
+  // Category breakdown donut-style
+  const totalCat = (a.categoryBreakdown||[]).reduce((s,c)=>s+c.count,0)||1;
+  const catColors = ['#6256e8','#189866','#f59e0b','#e14f65','#1d6fb3','#8b5cf6'];
+  const catRows = (a.categoryBreakdown||[]).map((c,i)=>`
+    <div class="donut-row">
+      <div class="donut-swatch" style="background:${catColors[i%catColors.length]}"></div>
+      <div style="flex:1">${esc(c._id)}</div>
+      <strong>${c.count}</strong>
+      <span style="color:var(--muted);font-size:11px;margin-left:4px">${Math.round((c.count/totalCat)*100)}%</span>
+    </div>`).join('');
+
+  // Location breakdown
+  const locRows = (a.locationBreakdown||[]).map(l=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <div style="font-size:12px;flex:1">📍 ${esc(l._id)}</div>
+      <div style="width:${Math.round((l.count/((a.locationBreakdown[0]?.count)||1))*120)}px;height:8px;background:var(--primary-light);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:100%;background:var(--primary);opacity:.7"></div>
+      </div>
+      <strong style="font-size:12px;width:24px;text-align:right">${l.count}</strong>
+    </div>`).join('');
+
+  const ret = a.returnRate;
+  const retPct = ret.total>0?Math.round((ret.returned/ret.total)*100):0;
+
+  document.getElementById('analyticsContent').innerHTML = `
+    <div class="dash-grid">
+      <div class="dash-card full">
+        <h3>📊 Monthly Report Trends (Lost vs Found)</h3>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:180px;padding:4px 0">
+          ${barChart||'<p style="color:var(--muted);font-size:13px;margin:auto">No data</p>'}
+        </div>
+        <div style="display:flex;gap:16px;margin-top:24px;font-size:11px">
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--primary-light);border-radius:2px;margin-right:4px"></span>Lost</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#c7f0dd;border-radius:2px;margin-right:4px"></span>Found</span>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3>📂 Category Breakdown</h3>
+        <div>${catRows||'<p style="color:var(--muted);font-size:13px">No data</p>'}</div>
+      </div>
+
+      <div class="dash-card">
+        <h3>📍 Top Locations</h3>
+        ${locRows||'<p style="color:var(--muted);font-size:13px">No data</p>'}
+      </div>
+
+      <div class="dash-card">
+        <h3>✅ Return Rate</h3>
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-size:52px;font-weight:800;color:${retPct>=50?'var(--success)':'var(--warning)'}">${retPct}%</div>
+          <p style="color:var(--muted);font-size:13px;margin-top:8px">${ret.returned} of ${ret.total} found items returned</p>
+          <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:14px">
+            <div style="height:100%;width:${retPct}%;background:var(--success);transition:.5s"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3>📋 Claim Rates</h3>
+        <div style="padding:10px 0">
+          ${(a.claimTrend||[]).reduce((acc,c)=>{ acc[c._id.status]=(acc[c._id.status]||0)+c.count; return acc; },{})}
+        </div>
+        <div style="font-size:13px">
+          ${Object.entries((a.claimTrend||[]).reduce((acc,c)=>{ acc[c._id.status]=(acc[c._id.status]||0)+c.count; return acc; },{})).map(([s,n])=>`
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+              <span>${pill(s)}</span><strong>${n}</strong>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── AUDIT LOG ─────────────────────────────────────────────────────────────────
+let auditPage=1;
+const auditIcons = {
+  ITEM_APPROVED:'✅',ITEM_REJECTED:'❌',ITEM_RETURNED:'🏆',ITEM_CANCELLED:'🚫',ITEM_DELETED:'🗑️',
+  CLAIM_APPROVED:'📋',CLAIM_REJECTED:'📋',USER_SUSPENDED:'🔒',USER_UNSUSPENDED:'🔓',
+  REWARD_CONFIRMED:'🏅',REWARD_ISSUED:'🎁',REWARD_REDEEMED:'✔️',REWARD_EXPIRED:'⌛',
+  POINTS_ADJUSTED:'⭐',SYSTEM:'🔧'
+};
+
+async function loadAuditLog(){
+  loading('auditLogWrap');
+  const action = document.getElementById('auditActionFilter').value;
+  const qs     = new URLSearchParams({page:auditPage,limit:30,action});
+  const {ok,data} = await api('GET',`/admin/audit-logs?${qs}`);
+  if(!ok||!data.success){ document.getElementById('auditLogWrap').innerHTML='<p style="color:var(--danger);padding:16px">Failed.</p>'; return; }
+
+  if(!data.logs.length){
+    document.getElementById('auditLogWrap').innerHTML='<div class="empty-state"><span class="es-icon">🔒</span><p>No audit records yet. Actions are logged automatically.</p></div>';
+    return;
+  }
+
+  const pages = Math.ceil(data.total/30);
+  const items = data.logs.map(l=>`
+    <div class="audit-item">
+      <div class="audit-icon">${auditIcons[l.action]||'🔧'}</div>
+      <div class="audit-body">
+        <strong>${esc(l.action.replace(/_/g,' '))}${l.description?' – '+esc(l.description):''}</strong>
+        <small>By: ${esc(l.admin?.name||l.adminName||'Admin')} (${esc(l.admin?.email||'')})</small>
+      </div>
+      <div class="audit-time">${ago(l.createdAt)}<br><small style="font-size:9px">${td(l.createdAt)}</small></div>
+    </div>`).join('');
+
+  document.getElementById('auditLogWrap').innerHTML = `
+    <div style="padding:16px">${items}</div>
+    <div class="pagination">
+      <span>${data.total} record${data.total!==1?'s':''} — read-only log</span>
+      <div class="pagination-btns">
+        <button class="page-btn" onclick="auditPage=Math.max(1,auditPage-1);loadAuditLog()" ${auditPage<=1?'disabled':''}>← Prev</button>
+        <span style="padding:0 10px;font-size:12px">Page ${auditPage} of ${pages||1}</span>
+        <button class="page-btn" onclick="auditPage++;loadAuditLog()" ${auditPage>=pages?'disabled':''}>Next →</button>
+      </div>
+    </div>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+// Hide sidebar + topbar until logged in
+document.querySelector('.sidebar').style.display='none';
+document.querySelector('.topbar').style.display='none';
+document.querySelector('.page-content').style.paddingTop='28px';
+
+// Restore session
+restoreSession();
+
+// Responsive sidebar toggle
+if(window.innerWidth<=640){
+  document.getElementById('sidebarToggle').style.display='block';
+  document.querySelector('.main-content').style.marginLeft='0';
+}
+</script>
+</body>
+</html>

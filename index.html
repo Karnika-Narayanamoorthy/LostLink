@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LostLink | Campus Lost &amp; Found</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- =====================================================
+                         NAVBAR
+====================================================== -->
+<header class="navbar" id="navbar">
+  <a href="#home" class="brand">
+    <span class="brand-logo">L</span>
+    <span>LostLink</span>
+  </a>
+
+  <nav class="nav-links" id="navLinks">
+    <a href="#home" onclick="showPage('home')">Home</a>
+    <a href="#browse" onclick="showPage('home'); setTimeout(()=>document.getElementById('browse').scrollIntoView({behavior:'smooth'}),100)">Browse Items</a>
+    <a href="#campus-map" onclick="showPage('home'); setTimeout(()=>document.getElementById('campus-map').scrollIntoView({behavior:'smooth'}),100)">Campus Map</a>
+    <a href="#leaderboard" onclick="showPage('leaderboard')">Leaderboard</a>
+    <a href="#monthly-rewards" onclick="showPage('monthly-rewards')">🏆 Monthly Rewards</a>
+  </nav>
+
+  <div class="nav-buttons" id="navButtons">
+    <!-- Notification bell (visible when logged in) -->
+    <div class="notif-bell-wrap" id="notifBellWrap" style="display:none">
+      <button class="notif-bell-btn" id="notifBellBtn" onclick="toggleNotifDropdown()" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <!-- Notification Dropdown -->
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <strong>Notifications</strong>
+          <button class="notif-read-all-btn" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="notif-empty">No notifications yet.</div>
+        </div>
+        <div class="notif-footer">
+          <button onclick="showPage('notifications')">View all notifications →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest buttons -->
+    <div id="guestButtons">
+      <button class="login-btn" onclick="openModal('loginModal')">Log in</button>
+      <button class="primary-btn small" onclick="openModal('registerModal')">Sign Up</button>
+    </div>
+
+    <!-- Logged-in user menu -->
+    <div class="user-menu-wrap" id="userMenuWrap" style="display:none">
+      <button class="user-avatar-btn" id="userAvatarBtn" onclick="toggleUserMenu()">
+        <span class="avatar-circle" id="avatarCircle">U</span>
+        <span id="userNameShort">User</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header" id="userDropdownName">Student</div>
+        <a onclick="showPage('dashboard'); closeUserMenu()">My Dashboard</a>
+        <a onclick="showPage('activity'); closeUserMenu()">My Activity</a>
+        <a onclick="showPage('monthly-rewards'); closeUserMenu()">🏆 Monthly Rewards</a>
+        <a onclick="openModal('reportModal'); closeUserMenu()">Report an Item</a>
+        <a onclick="showPage('leaderboard'); closeUserMenu()">Leaderboard</a>
+        <hr>
+        <a onclick="logoutUser()" class="logout-link">Log out</a>
+      </div>
+    </div>
+  </div>
+
+  <button class="menu-btn" id="menuBtn" onclick="toggleMobileMenu()">☰</button>
+</header>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#home" onclick="showPage('home'); toggleMobileMenu()">Home</a>
+  <a onclick="showPage('home'); toggleMobileMenu(); setTimeout(()=>document.getElementById('browse').scrollIntoView({behavior:'smooth'}),100)">Browse Items</a>
+  <a onclick="showPage('home'); toggleMobileMenu(); setTimeout(()=>document.getElementById('campus-map').scrollIntoView({behavior:'smooth'}),100)">Campus Map</a>
+  <a onclick="showPage('leaderboard'); toggleMobileMenu()">Leaderboard</a>
+  <a onclick="showPage('monthly-rewards'); toggleMobileMenu()">🏆 Monthly Rewards</a>
+  <div id="mobileGuestBtns">
+    <button class="primary-btn full" onclick="openModal('loginModal'); toggleMobileMenu()">Log in</button>
+    <button class="outline-btn full" style="margin-top:8px" onclick="openModal('registerModal'); toggleMobileMenu()">Sign Up</button>
+  </div>
+  <div id="mobileUserBtns" style="display:none">
+    <button class="primary-btn full" onclick="showPage('dashboard'); toggleMobileMenu()">My Dashboard</button>
+    <button class="outline-btn full" style="margin-top:8px" onclick="showPage('activity'); toggleMobileMenu()">My Activity</button>
+    <button class="outline-btn full" style="margin-top:8px" onclick="logoutUser()">Log out</button>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: HOME
+====================================================== -->
+<div id="page-home">
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-tag">🎓 Campus Lost &amp; Found</div>
+      <h1>Lost something?<br><span>Let's find it.</span></h1>
+      <p>A simple way for students to report, search and reconnect with lost belongings across campus.</p>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input id="heroSearch" type="text" placeholder="Search for lost or found items..." onkeyup="handleSearchKey(event)">
+        <button onclick="searchItems()">Search</button>
+      </div>
+      <div class="hero-buttons">
+        <button class="primary-btn" onclick="requireAuth(()=>openModal('lostModal'))">I Lost Something</button>
+        <button class="secondary-btn" onclick="requireAuth(()=>openModal('foundModal'))">I Found Something</button>
+      </div>
+    </div>
+    <div class="hero-illustration">
+      <div class="floating-card card-one">
+        <span class="floating-icon">🎧</span>
+        <div><strong>AirPods</strong><small>Found • Library</small></div>
+      </div>
+      <div class="illustration-circle">
+        <div class="location-pin">📍</div>
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+      </div>
+      <div class="floating-card card-two">
+        <span class="floating-icon">🎒</span>
+        <div><strong>Backpack</strong><small>Lost • Block A</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stat"><strong id="statTotal">0</strong><span>Items Listed</span></div>
+    <div class="stat"><strong id="statReturned">173</strong><span>Items Returned</span></div>
+    <div class="stat"><strong id="statFound">0</strong><span>Active Found</span></div>
+    <div class="stat"><strong>94%</strong><span>Success Rate</span></div>
+  </section>
+
+  <!-- BROWSE ITEMS -->
+  <section class="items-section" id="browse">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">RECENTLY POSTED</span>
+        <h2>Find what you're looking for</h2>
+        <p>Browse recently reported lost and found items on campus.</p>
+      </div>
+      <button class="outline-btn" onclick="loadAllItems()">View all items →</button>
+    </div>
+    <div class="filter-row">
+      <button class="filter active" data-filter="all"    onclick="setTypeFilter('all',this)">All</button>
+      <button class="filter"        data-filter="lost"   onclick="setTypeFilter('lost',this)">Lost</button>
+      <button class="filter"        data-filter="found"  onclick="setTypeFilter('found',this)">Found</button>
+      <select id="categoryFilter" onchange="applyFilters()">
+        <option value="all">All categories</option>
+        <option value="electronics">Electronics</option>
+        <option value="bags">Bags</option>
+        <option value="documents">Documents</option>
+        <option value="accessories">Accessories</option>
+        <option value="clothing">Clothing</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="items-grid" id="itemsGrid">
+      <div class="items-loading"><div class="spinner"></div></div>
+    </div>
+    <p class="empty-state" id="emptyState" style="display:none">No matching items found.</p>
+    <div class="pagination-row" id="paginationRow" style="display:none">
+      <button class="outline-btn" id="prevPageBtn" onclick="changePage(-1)">← Prev</button>
+      <span id="pageInfo">Page 1</span>
+      <button class="outline-btn" id="nextPageBtn" onclick="changePage(1)">Next →</button>
+    </div>
+  </section>
+
+  <!-- CAMPUS MAP -->
+  <section class="map-section" id="campus-map">
+    <div class="map-header">
+      <div>
+        <span class="eyebrow">CAMPUS LOCATION</span>
+        <h2>Locate the lost or found item</h2>
+        <p>Click on the campus map or select a location to find items reported there and nearby.</p>
+      </div>
+      <button class="clear-map-btn" onclick="clearMarker()">Clear Location</button>
+    </div>
+    <div class="map-controls">
+      <div class="location-selector">
+        <span>📍</span>
+        <select id="mapLocation" onchange="locateFromSelect()">
+          <option value="">Select a campus location</option>
+        </select>
+      </div>
+      <button class="primary-btn locate-button" onclick="locateSelectedLocation()">📍 Locate</button>
+    </div>
+    <div class="map-container" id="mapContainer" onclick="selectMapLocation(event)">
+      <img src="campus-map.jpg" alt="KPRIET Campus Map" class="campus-map" id="campusMapImage">
+      <div class="map-instruction" id="mapInstruction">👆 Click on the map to locate a nearby campus area</div>
+      <div id="mapMarker" class="map-marker">
+        <div class="marker-pin">📍</div>
+        <div class="marker-label">
+          <strong id="markerTitle">Location</strong>
+          <span>LostLink location</span>
+        </div>
+      </div>
+    </div>
+    <div id="selectedLocation" class="selected-location">
+      <span>📍</span>
+      <div><strong>No location selected</strong><small>Click the map or select a campus location.</small></div>
+    </div>
+    <div class="nearby-results" id="nearbyResults">
+      <div class="results-heading">
+        <span class="eyebrow">LOCATION RESULTS</span>
+        <h3 id="resultsTitle">Select a place on the map</h3>
+        <p id="resultsDescription">Click anywhere on the campus map to find lost and found items nearby.</p>
+      </div>
+      <div class="location-group">
+        <h4>📍 Items at this location</h4>
+        <div class="location-items" id="exactLocationItems">
+          <div class="no-items">No location selected yet.</div>
+        </div>
+      </div>
+      <div class="location-group">
+        <h4>🧭 Nearby items</h4>
+        <div class="location-items" id="nearbyLocationItems">
+          <div class="no-items">Select a location to see nearby items.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- end page-home -->
+
+<!-- =====================================================
+                    PAGE: NOTIFICATIONS
+====================================================== -->
+<div id="page-notifications" style="display:none">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h2>Notifications</h2>
+      <button class="outline-btn" onclick="markAllRead()">Mark all as read</button>
+    </div>
+    <div id="notifPageList" class="notif-page-list">
+      <div class="items-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: DASHBOARD
+====================================================== -->
+<div id="page-dashboard" style="display:none">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h2 id="dashboardTitle">My Dashboard</h2>
+    </div>
+
+    <!-- Contribution Card -->
+    <div class="contribution-card" id="contributionCard">
+      <div class="contrib-main">
+        <div class="contrib-badge-wrap">
+          <div class="contrib-badge" id="contribBadgeIcon">🏅</div>
+          <div>
+            <div class="contrib-level" id="contribLevel">New Finder</div>
+            <div class="contrib-badge-name" id="contribBadgeName">Starter Badge</div>
+          </div>
+        </div>
+        <div class="contrib-points-wrap">
+          <div class="contrib-points-num" id="contribPoints">0</div>
+          <div class="contrib-points-label">Contribution Points</div>
+        </div>
+      </div>
+      <div class="contrib-stats-row">
+        <div class="contrib-stat"><div class="contrib-stat-num" id="cStatTotal">0</div><div class="contrib-stat-label">Found Reports</div></div>
+        <div class="contrib-stat"><div class="contrib-stat-num" id="cStatVerified">0</div><div class="contrib-stat-label">Verified Reports</div></div>
+        <div class="contrib-stat"><div class="contrib-stat-num" id="cStatReturned">0</div><div class="contrib-stat-label">Items Returned</div></div>
+      </div>
+      <div class="progress-section">
+        <div class="progress-label">
+          <span id="progressLabel">Progress to next level</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-next" id="progressNext"></div>
+      </div>
+    </div>
+
+    <!-- My Reports -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <h3>My Reports</h3>
+        <button class="primary-btn small" onclick="openModal('reportModal')">+ New Report</button>
+      </div>
+      <div id="myItemsGrid" class="items-grid">
+        <div class="items-loading"><div class="spinner"></div></div>
+      </div>
+      <p id="myItemsEmpty" class="empty-state" style="display:none">You haven't submitted any reports yet.</p>
+    </div>
+
+    <!-- Contribution History -->
+    <div class="dash-section">
+      <h3>Contribution History</h3>
+      <div id="contribHistoryList" class="contrib-history-list">
+        <div class="items-loading"><div class="spinner"></div></div>
+      </div>
+      <p id="contribHistoryEmpty" class="empty-state" style="display:none">No contribution history yet.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: LEADERBOARD
+====================================================== -->
+<div id="page-leaderboard" style="display:none">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h2>Campus Leaderboard</h2>
+    </div>
+    <p class="page-subtitle">Top contributors who helped return lost items to their owners.</p>
+    <div class="leaderboard-filters">
+      <button class="filter active" data-lb="overall" onclick="setLeaderboardFilter('overall',this)">Overall</button>
+      <button class="filter" data-lb="monthly"  onclick="setLeaderboardFilter('monthly',this)">This Month</button>
+      <button class="filter" data-lb="weekly"   onclick="setLeaderboardFilter('weekly',this)">This Week</button>
+    </div>
+    <div class="leaderboard-table-wrap">
+      <table class="leaderboard-table" id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student</th>
+            <th>Section</th>
+            <th>Badge</th>
+            <th>Points</th>
+            <th>Returned</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <tr><td colspan="6" class="lb-loading"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: ITEM DETAIL
+====================================================== -->
+<div id="page-item-detail" style="display:none">
+  <div class="page-container">
+    <button class="back-btn" onclick="history.back(); showPage('home')" id="itemDetailBack">← Back</button>
+    <div id="itemDetailContent">
+      <div class="items-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: ADMIN DASHBOARD
+====================================================== -->
+<div id="page-admin" style="display:none">
+  <div class="page-container admin-container">
+    <div class="admin-header">
+      <div class="brand"><span class="brand-logo" style="background:#e14f65">A</span><strong>Admin Dashboard</strong></div>
+      <button class="outline-btn" onclick="showPage('home')">← Back to Site</button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="admin-stats-row" id="adminStatsRow">
+      <div class="admin-stat-card"><div class="astat-num" id="aStatPending">0</div><div class="astat-label">Pending Reports</div></div>
+      <div class="admin-stat-card"><div class="astat-num" id="aStatApproved">0</div><div class="astat-label">Approved Items</div></div>
+      <div class="admin-stat-card"><div class="astat-num" id="aStatMatches">0</div><div class="astat-label">Smart Matches</div></div>
+      <div class="admin-stat-card"><div class="astat-num" id="aStatClaims">0</div><div class="astat-label">Pending Claims</div></div>
+      <div class="admin-stat-card"><div class="astat-num" id="aStatUsers">0</div><div class="astat-label">Total Users</div></div>
+      <div class="admin-stat-card"><div class="astat-num" id="aStatRewards">0</div><div class="astat-label">Pending Rewards</div></div>
+    </div>
+
+    <!-- Admin tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="pending"       onclick="switchAdminTab('pending',this)">Pending Items</button>
+      <button class="admin-tab"        data-tab="all-items"     onclick="switchAdminTab('all-items',this)">All Items</button>
+      <button class="admin-tab"        data-tab="claims"        onclick="switchAdminTab('claims',this)">Claims</button>
+      <button class="admin-tab"        data-tab="matches"       onclick="switchAdminTab('matches',this)">Smart Matches</button>
+      <button class="admin-tab"        data-tab="contributions" onclick="switchAdminTab('contributions',this)">Contributions</button>
+      <button class="admin-tab"        data-tab="rewards"       onclick="switchAdminTab('rewards',this)">🏆 Monthly Rewards</button>
+      <button class="admin-tab"        data-tab="users"         onclick="switchAdminTab('users',this)">Users</button>
+    </div>
+
+    <div id="adminTabContent">
+      <div class="items-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: MY ACTIVITY
+====================================================== -->
+<div id="page-activity" style="display:none">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('dashboard')">← Back</button>
+      <h2>My Activity</h2>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="act-summary-row" id="actSummaryRow">
+      <div class="act-sum-card"><div class="act-sum-num" id="actSumLost">0</div><div class="act-sum-label">Lost Reports</div></div>
+      <div class="act-sum-card"><div class="act-sum-num" id="actSumFound">0</div><div class="act-sum-label">Found Reports</div></div>
+      <div class="act-sum-card"><div class="act-sum-num" id="actSumClaims">0</div><div class="act-sum-label">Claims</div></div>
+      <div class="act-sum-card act-sum-green"><div class="act-sum-num" id="actSumReturned">0</div><div class="act-sum-label">Items Returned</div></div>
+      <div class="act-sum-card act-sum-purple"><div class="act-sum-num" id="actSumPoints">0</div><div class="act-sum-label">Points Earned</div></div>
+    </div>
+
+    <!-- Filters / search -->
+    <div class="act-filter-bar">
+      <div class="act-tabs" id="actTabs">
+        <button class="filter active" data-act="all"     onclick="setActivityTab('all',this)">All</button>
+        <button class="filter"        data-act="lost"    onclick="setActivityTab('lost',this)">Lost Reports</button>
+        <button class="filter"        data-act="found"   onclick="setActivityTab('found',this)">Found Reports</button>
+        <button class="filter"        data-act="claims"  onclick="setActivityTab('claims',this)">My Claims</button>
+        <button class="filter"        data-act="returned"onclick="setActivityTab('returned',this)">Returned</button>
+        <button class="filter"        data-act="points"  onclick="setActivityTab('points',this)">Points History</button>
+      </div>
+      <div class="act-search-row">
+        <input type="text" id="actSearch" placeholder="Search activities…" oninput="debounceActivitySearch()">
+        <input type="date" id="actDateFrom" onchange="loadActivityPage()">
+        <span style="font-size:12px;color:var(--muted)">to</span>
+        <input type="date" id="actDateTo"   onchange="loadActivityPage()">
+        <select id="actSort" onchange="loadActivityPage()">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Activity list -->
+    <div id="activityList" class="activity-list">
+      <div class="items-loading"><div class="spinner"></div></div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" id="actPaginationRow" style="display:none">
+      <button class="outline-btn" id="actPrevBtn" onclick="changeActivityPage(-1)">← Prev</button>
+      <span id="actPageInfo">Page 1</span>
+      <button class="outline-btn" id="actNextBtn" onclick="changeActivityPage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- =====================================================
+                    PAGE: MONTHLY REWARDS
+====================================================== -->
+<div id="page-monthly-rewards" style="display:none">
+  <div class="page-container">
+    <div class="page-header">
+      <button class="back-btn" onclick="showPage('home')">← Back</button>
+      <h2>🏆 Monthly Finder Champion</h2>
+    </div>
+
+    <!-- Current month hero -->
+    <div class="reward-hero" id="rewardHero">
+      <div class="reward-hero-left">
+        <div class="eyebrow">CURRENT MONTH</div>
+        <div class="reward-month-label" id="rewardMonthLabel">Loading…</div>
+        <div class="reward-countdown" id="rewardCountdown">
+          <span>⏱</span> <span id="countdownText">–</span> remaining
+        </div>
+      </div>
+      <div class="reward-hero-right" id="myRankCard" style="display:none">
+        <div class="my-rank-badge">
+          <div class="my-rank-num" id="myCurrentRank">–</div>
+          <div class="my-rank-label">Your Rank</div>
+        </div>
+        <div class="my-rank-pts">
+          <strong id="myMonthlyPts">0</strong>
+          <span>monthly pts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- My rewards section (auth only) -->
+    <div id="myRewardsSection" style="display:none">
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h3>🎁 My Rewards</h3>
+        </div>
+        <div id="myRewardsList" class="reward-list">
+          <div class="items-loading"><div class="spinner"></div></div>
+        </div>
+        <p id="myRewardsEmpty" class="empty-state" style="display:none">No rewards yet. Keep contributing!</p>
+      </div>
+    </div>
+
+    <!-- Monthly leaderboard -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <h3>This Month's Leaderboard</h3>
+      </div>
+      <div class="leaderboard-table-wrap">
+        <table class="leaderboard-table">
+          <thead>
+            <tr><th>Rank</th><th>Student</th><th>Section</th><th>Monthly Pts</th><th>Returns</th></tr>
+          </thead>
+          <tbody id="monthlyLbBody">
+            <tr><td colspan="5" class="lb-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Past winners -->
+    <div class="dash-section">
+      <div class="dash-section-header">
+        <h3>🏅 Previous Champions</h3>
+      </div>
+      <div id="pastWinnersList" class="past-winners-list">
+        <div class="items-loading"><div class="spinner"></div></div>
+      </div>
+      <p id="pastWinnersEmpty" class="empty-state" style="display:none">No previous champions yet.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Reward Issue Modal -->
+<div class="modal-overlay" id="adminRewardModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('adminRewardModal')">×</button>
+    <span class="eyebrow">ISSUE FOOD COUPON</span>
+    <h2 id="adminRewardTitle">Issue Reward</h2>
+    <form onsubmit="submitAdminReward(event)">
+      <input type="hidden" id="adminRewardId">
+      <input type="hidden" id="adminRewardAction">
+      <label class="form-label">Coupon Code (required)</label>
+      <input type="text" id="adminCouponCode" placeholder="e.g. KPRLUNCH200" required>
+      <label class="form-label">Reward Title</label>
+      <input type="text" id="adminRewardTitleInput" value="Monthly Finder Champion Reward">
+      <label class="form-label">Description</label>
+      <textarea id="adminRewardDesc" placeholder="₹200 food coupon at Olive Dining…"></textarea>
+      <label class="form-label">Value (₹)</label>
+      <input type="number" id="adminRewardValue" value="200" min="1">
+      <label class="form-label">Expiry Date</label>
+      <input type="date" id="adminRewardExpiry">
+      <label class="form-label">Admin Note</label>
+      <textarea id="adminRewardNote" placeholder="Optional note…"></textarea>
+      <button class="primary-btn full" type="submit">Issue Coupon</button>
+      <p class="form-msg" id="adminRewardMsg"></p>
+    </form>
+  </div>
+</div>
+<!-- =====================================================
+                    FOOTER
+====================================================== -->
+<footer id="mainFooter">
+  <div class="footer-brand"><span class="brand-logo">L</span><strong>LostLink</strong></div>
+  <p>Making campus a little less forgetful.</p>
+  <span>© 2026 LostLink</span>
+</footer>
+
+<!-- =====================================================
+                    MODALS
+====================================================== -->
+
+<!-- Report Choice -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('reportModal')">×</button>
+    <span class="eyebrow">REPORT</span>
+    <h2>What happened?</h2>
+    <p>Choose the type of report you want to create.</p>
+    <div class="choice-grid">
+      <button class="choice" onclick="closeModal('reportModal');openModal('lostModal')">
+        🔍<strong>I Lost Something</strong><small>Report an item you can't find.</small>
+      </button>
+      <button class="choice" onclick="closeModal('reportModal');openModal('foundModal')">
+        🤝<strong>I Found Something</strong><small>Help someone get their item back.</small>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Lost Modal -->
+<div class="modal-overlay" id="lostModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('lostModal')">×</button>
+    <span class="eyebrow">LOST ITEM</span>
+    <h2>Report a lost item</h2>
+    <form id="lostForm" onsubmit="submitLostReport(event)">
+      <label class="form-label">Item Photo</label>
+      <div class="image-upload">
+        <input type="file" id="lostItemImage" accept="image/*" onchange="previewImage(this,'lostPreview')">
+        <label for="lostItemImage" class="upload-box">
+          <span>📷</span><strong>Upload item photo</strong><small>JPG, PNG or WEBP • Max 5 MB</small>
+        </label>
+      </div>
+      <img id="lostPreview" class="image-preview" alt="Lost item preview">
+      <input id="lostItemName" required placeholder="Item name">
+      <select id="lostCategory" required>
+        <option value="">Category</option>
+        <option value="electronics">Electronics</option>
+        <option value="bags">Bags</option>
+        <option value="documents">Documents</option>
+        <option value="accessories">Accessories</option>
+        <option value="clothing">Clothing</option>
+        <option value="other">Other</option>
+      </select>
+      <select id="lostLocation" required>
+        <option value="">Where did you lose it?</option>
+      </select>
+      <input type="date" id="lostDate" required>
+      <textarea id="lostDescription" placeholder="Describe the item in detail..."></textarea>
+      <button class="primary-btn full" type="submit" id="lostSubmitBtn">Submit Lost Report</button>
+      <p class="form-msg" id="lostFormMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Found Modal -->
+<div class="modal-overlay" id="foundModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('foundModal')">×</button>
+    <span class="eyebrow">FOUND ITEM</span>
+    <h2>Report a found item</h2>
+    <form id="foundForm" onsubmit="submitFoundReport(event)">
+      <label class="form-label">Item Photo</label>
+      <div class="image-upload">
+        <input type="file" id="foundItemImage" accept="image/*" onchange="previewImage(this,'foundPreview')">
+        <label for="foundItemImage" class="upload-box">
+          <span>📷</span><strong>Upload item photo</strong><small>JPG, PNG or WEBP • Max 5 MB</small>
+        </label>
+      </div>
+      <img id="foundPreview" class="image-preview" alt="Found item preview">
+      <input id="foundItemName" required placeholder="What did you find?">
+      <select id="foundCategory" required>
+        <option value="">Category</option>
+        <option value="electronics">Electronics</option>
+        <option value="bags">Bags</option>
+        <option value="documents">Documents</option>
+        <option value="accessories">Accessories</option>
+        <option value="clothing">Clothing</option>
+        <option value="other">Other</option>
+      </select>
+      <select id="foundLocation" required>
+        <option value="">Where did you find it?</option>
+      </select>
+      <input type="date" id="foundDate" required>
+      <textarea id="foundDescription" placeholder="General description of the item..."></textarea>
+      <div class="verification-box">
+        <div class="verification-title">
+          <span>🔐</span>
+          <div><strong>Private verification</strong><small>This information will NOT be shown publicly.</small></div>
+        </div>
+        <label class="form-label">Special characteristic</label>
+        <input type="text" id="verificationCharacteristic" required placeholder="Example: Small scratch near the camera">
+        <p class="verification-help">Choose a detail difficult for a stranger to guess. The claimant must describe this detail before the claim proceeds.</p>
+      </div>
+      <button class="primary-btn full" type="submit" id="foundSubmitBtn">Submit Found Report</button>
+      <p class="form-msg" id="foundFormMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Claim Modal -->
+<div class="modal-overlay" id="claimModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('claimModal')">×</button>
+    <span class="eyebrow">ITEM VERIFICATION</span>
+    <h2>Claim this item</h2>
+    <p>Describe a special characteristic that only the genuine owner would know.</p>
+    <div class="claim-item-name">
+      <span>📦</span>
+      <strong id="claimItemName">Item</strong>
+    </div>
+    <form onsubmit="submitClaim(event)">
+      <label class="form-label">What special characteristic does this item have?</label>
+      <textarea id="claimAnswer" required placeholder="Describe a unique detail only the owner would know..."></textarea>
+      <textarea id="claimAdditionalInfo" placeholder="Any additional information (optional)..."></textarea>
+      <p class="claim-warning">🔐 Your answer is compared with the private characteristic provided by the finder.</p>
+      <button class="primary-btn full" type="submit" id="claimSubmitBtn">Submit Claim</button>
+      <p class="form-msg" id="claimFormMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('loginModal')">×</button>
+    <span class="eyebrow">WELCOME BACK</span>
+    <h2>Log in to LostLink</h2>
+    <form onsubmit="loginUser(event)">
+      <input type="email" id="loginEmail" required placeholder="College email">
+      <input type="password" id="loginPassword" required placeholder="Password">
+      <button class="primary-btn full" type="submit" id="loginBtn">Log in</button>
+      <p class="form-msg" id="loginMsg"></p>
+    </form>
+    <p class="demo-note">Don't have an account? <button class="link-btn" onclick="closeModal('loginModal');openModal('registerModal')">Sign up</button></p>
+    <p class="demo-note" style="margin-top:4px">Admin: admin@kpriet.ac.in / admin1234</p>
+  </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('registerModal')">×</button>
+    <span class="eyebrow">CREATE ACCOUNT</span>
+    <h2>Join LostLink</h2>
+    <form onsubmit="registerUser(event)">
+      <input type="text"  id="regName"     required placeholder="Full name">
+      <input type="email" id="regEmail"    required placeholder="College email">
+      <input type="text"  id="regSection"          placeholder="Section (e.g. CSE-A)">
+      <input type="password" id="regPassword" required placeholder="Password (min 6 chars)" minlength="6">
+      <button class="primary-btn full" type="submit" id="registerBtn">Create Account</button>
+      <p class="form-msg" id="registerMsg"></p>
+    </form>
+    <p class="demo-note">Already have an account? <button class="link-btn" onclick="closeModal('registerModal');openModal('loginModal')">Log in</button></p>
+  </div>
+</div>
+
+<!-- Admin Item Status Modal -->
+<div class="modal-overlay" id="adminStatusModal">
+  <div class="modal">
+    <button class="close" onclick="closeModal('adminStatusModal')">×</button>
+    <span class="eyebrow">UPDATE STATUS</span>
+    <h2 id="adminStatusTitle">Update Item Status</h2>
+    <form onsubmit="submitAdminStatus(event)">
+      <input type="hidden" id="adminStatusItemId">
+      <select id="adminStatusSelect" required>
+        <option value="approved">Approve</option>
+        <option value="rejected">Reject</option>
+        <option value="returned">Mark as Returned</option>
+        <option value="cancelled">Cancel</option>
+      </select>
+      <textarea id="adminStatusNote" placeholder="Admin note / reason (optional)..."></textarea>
+      <button class="primary-btn full" type="submit">Update Status</button>
+      <p class="form-msg" id="adminStatusMsg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment variables (keep .env.example, not .env)
+backend/.env
+
+# Uploaded files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
